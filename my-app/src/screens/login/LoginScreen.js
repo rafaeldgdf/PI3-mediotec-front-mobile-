@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
 const handleLogin = async () => {
   try {
     // Enviar as credenciais para o back-end
-    const response = await axios.post('http://10.0.0.108:8080/auth/login', {
+    const response = await axios.post('http://10.0.0.103:8080/auth/login', {
       email,
       senha,
       role: userType  // Passa a role (aluno, professor ou coordenador)
