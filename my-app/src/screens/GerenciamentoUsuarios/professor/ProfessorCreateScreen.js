@@ -15,7 +15,7 @@ import { CheckBox } from 'react-native-elements';
 import api from '../../../api/api';
 import LayoutWrapper from '../../../components/LayoutWrapper';
 import { format } from 'date-fns';
-import checkRoleInToken from '../../../api/checkRoleInToken';
+
 
 
 const getSelectedNames = (items, selectedIds, key) =>
@@ -92,14 +92,6 @@ const ProfessorCreateScreen = ({ navigation, route }) => {
   };
 
   const handleSave = async () => {
-
-    const hasRole = await checkRoleInToken();
-    console.log('Usuário tem permissão para cadastrar:', hasRole);
-
-    if (!hasRole) {
-      Alert.alert('Acesso Negado', 'Você não tem permissão para cadastrar um professor.');
-      return;  // Não continua o processo se não tiver a role correta
-    }
 
     if (!cpf || !nome || !ultimoNome || !email || !dataNascimento || !coordenacaoId) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
