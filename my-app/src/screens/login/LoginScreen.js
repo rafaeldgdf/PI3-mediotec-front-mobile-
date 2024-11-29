@@ -11,14 +11,9 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [userType, setUserType] = useState('aluno');
-
+const LoginScreen = ({ navigation, onLogin }) => {
+const [userType, setUserType] = useState('aluno');
+  
   // Bloqueia o botão "Voltar" para impedir o retorno a telas anteriores
   useEffect(() => {
     const backAction = () => {
@@ -28,53 +23,29 @@ const LoginScreen = ({ navigation }) => {
       ]);
       return true; // Impede o comportamento padrão do botão voltar
     };
-
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction
     );
-
-    return () => backHandler.remove(); // Remove o listener quando o componente desmontar
+    return () => backHandler.remove(); // Remove o listener quando o componente
+    desmontar
   }, []);
-
-  // Função de login
-// Função de login
-const handleLogin = async () => {
-  try {
-    // Enviar as credenciais para o back-end
-    const response = await axios.post('http://10.0.0.116:8080/auth/login', {
-      email,
-      senha,
-      role: userType  // Passa a role (aluno, professor ou coordenador)
+  const handleLogin = () => {
+    onLogin(userType); // Define o tipo de usuário
+    navigation.reset({
+      index: 0, // Reseta o estado de navegação
+      routes: [
+        {
+          name:
+            userType === 'aluno'
+              ? 'AlunoMenu'
+              : userType === 'professor'
+                ? 'ProfessorMenu'
+                : 'CoordenadorMenu', // Navega para o menu correto
+        },
+      ],
     });
-
-    const { token } = response.data; // O token será retornado pela API
-
-    // Armazenar o token JWT no AsyncStorage
-    await AsyncStorage.setItem('jwtToken', token);
-
-    // Navegar para a tela apropriada com base no tipo de usuário
-    if (userType === 'aluno') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'AlunoMenu' }],
-      });
-    } else if (userType === 'professor') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'ProfessorMenu' }],
-      });
-    } else if (userType === 'coordenador') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'CoordenadorMenu' }],
-      });
-    }
-  } catch (error) {
-    Alert.alert('Erro', 'Credenciais inválidas ou erro na requisição.');
-  }
-};
-
+  };
 
   return (
     <View style={styles.container}>
@@ -87,16 +58,14 @@ const handleLogin = async () => {
         style={styles.input}
         placeholder="Digite seu login"
         placeholderTextColor="#888"
-        value={email}
-        onChangeText={(text) => setEmail(text)} // Guardar o email
+        editable={false}
       />
       <TextInput
         style={styles.input}
         placeholder="Digite sua senha"
         placeholderTextColor="#888"
         secureTextEntry
-        value={senha}
-        onChangeText={(text) => setSenha(text)} // Guardar a senha
+        editable={false}
       />
 
       {/* Picker de Tipo de Usuário */}
@@ -107,17 +76,30 @@ const handleLogin = async () => {
           style={styles.picker}
           onValueChange={(itemValue) => setUserType(itemValue)}
         >
-          <Picker.Item label="Aluno" value="aluno" key="aluno" style={styles.pickerItem} />
-          <Picker.Item label="Professor" value="professor" key="professor" style={styles.pickerItem} />
-          <Picker.Item label="Coordenador" value="coordenador" key="coordenador" style={styles.pickerItem} />
+          <Picker.Item
+            label="Aluno"
+            value="aluno"
+            key="aluno"
+            style={styles.pickerItem}
+          />
+          <Picker.Item
+            label="Professor"
+            value="professor"
+            key="professor"
+            style={styles.pickerItem}
+          />
+          <Picker.Item
+            label="Coordenador"
+            value="coordenador"
+            key="coordenador"
+            style={styles.pickerItem}
+          />
         </Picker>
         {/* Ícones Representativos */}
         <View style={styles.iconsContainer}>
           <Icon
-            name={
-              userType === 'aluno' ? 'person' :
-              userType === 'professor' ? 'school' : 'supervisor-account'
-            }
+            name={userType === 'aluno' ? 'person' : userType === 'professor' ? 'school' :
+              'supervisor-account'}
             size={24}
             color="#007BFF"
           />
