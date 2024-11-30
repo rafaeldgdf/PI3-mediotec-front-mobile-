@@ -9,11 +9,24 @@ import {
   BackHandler,
   Alert,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';  // Importando useNavigation
 import Icon from 'react-native-vector-icons/MaterialIcons';
-const LoginScreen = ({ navigation, onLogin }) => {
-const [userType, setUserType] = useState('aluno');
-  
+import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const LoginScreen = ({ onLogin }) => {
+  const navigation = useNavigation(); // Usando o hook useNavigation
+  const [userType, setUserType] = useState('aluno');
+  const [loginValue, setLoginValue] = useState(''); // Pode ser CPF ou e-mail
+  const [senha, setSenha] = useState(''); // Campo para a senha
+  const [secureText, setSecureText] = useState(true); // Controla visibilidade da senha
+
+  // Função para verificar se o valor inserido é um e-mail válido
+  const isEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // Formato de e-mail
+    return regex.test(email);
+  };
+
   // Bloqueia o botão "Voltar" para impedir o retorno a telas anteriores
   useEffect(() => {
     const backAction = () => {
@@ -27,25 +40,36 @@ const [userType, setUserType] = useState('aluno');
       'hardwareBackPress',
       backAction
     );
-    return () => backHandler.remove(); // Remove o listener quando o componente
-    desmontar
+    return () => backHandler.remove(); // Remove o listener quando o componente desmontar
   }, []);
-  const handleLogin = () => {
-    onLogin(userType); // Define o tipo de usuário
-    navigation.reset({
-      index: 0, // Reseta o estado de navegação
-      routes: [
-        {
-          name:
-            userType === 'aluno'
-              ? 'AlunoMenu'
-              : userType === 'professor'
-                ? 'ProfessorMenu'
-                : 'CoordenadorMenu', // Navega para o menu correto
-        },
-      ],
-    });
+
+  // Lógica para fazer login
+
+  const handleLogin = async () => {
+    if (loginValue.trim() === '' || senha.trim() === '') {
+      Alert.alert('Erro', 'Preencha o CPF/e-mail e a senha');
+      return;
+    }
+  
+    const loginField = isEmail(loginValue) ? 'email' : isCpf(loginValue) ? 'cpf' : null;
+    if (!loginField) {
+      Alert.alert('Erro', 'Por favor, insira um CPF ou email válido');
+      return;
+    }
+  
+    try {
+      // Salve o CPF/email no AsyncStorage
+      await AsyncStorage.setItem(
+        'userInfo',
+        JSON.stringify({ tipo: userType, identificador: loginValue })
+      );
+      Alert.alert('Sucesso', 'Login realizado com sucesso.');
+      navigation.reset({ index: 0, routes: [{ name: 'CoordenadorMenu' }] });
+    } catch (error) {
+      console.error('Erro ao salvar informações do usuário:', error);
+    }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -56,17 +80,32 @@ const [userType, setUserType] = useState('aluno');
       {/* Campos de Entrada */}
       <TextInput
         style={styles.input}
-        placeholder="Digite seu login"
+        placeholder="Digite seu E-mail"
         placeholderTextColor="#888"
-        editable={false}
+        value={loginValue}
+        onChangeText={setLoginValue}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Digite sua senha"
-        placeholderTextColor="#888"
-        secureTextEntry
-        editable={false}
-      />
+      {/* Campo de Senha */}
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.inputPassword}
+          placeholder="Digite sua senha"
+          placeholderTextColor="#888"
+          secureTextEntry={secureText}
+          value={senha}
+          onChangeText={setSenha}
+        />
+        <TouchableOpacity
+          style={styles.eyeIconContainer}
+          onPress={() => setSecureText(!secureText)} // Alterna a visibilidade da senha
+        >
+          <Icon
+            name={secureText ? 'visibility-off' : 'visibility'} // Alterna entre ícones de olho aberto e fechado
+            size={24}
+            color="#007BFF"
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* Picker de Tipo de Usuário */}
       <Text style={styles.label}>Selecione o tipo de usuário:</Text>
@@ -95,15 +134,6 @@ const [userType, setUserType] = useState('aluno');
             style={styles.pickerItem}
           />
         </Picker>
-        {/* Ícones Representativos */}
-        <View style={styles.iconsContainer}>
-          <Icon
-            name={userType === 'aluno' ? 'person' : userType === 'professor' ? 'school' :
-              'supervisor-account'}
-            size={24}
-            color="#007BFF"
-          />
-        </View>
       </View>
 
       {/* Botão de Entrar */}
@@ -151,6 +181,26 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    marginBottom: 15,
+    backgroundColor: '#fff',
+  },
+  inputPassword: {
+    flex: 1,
+    padding: 15,
+    fontSize: 16,
+    color: '#333',
+  },
+  eyeIconContainer: {
+    paddingRight: 10,
+  },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -181,9 +231,6 @@ const styles = StyleSheet.create({
   pickerItem: {
     fontSize: 16,
     color: '#000',
-  },
-  iconsContainer: {
-    marginLeft: 10,
   },
   button: {
     width: '100%',

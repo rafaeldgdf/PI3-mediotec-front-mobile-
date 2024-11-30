@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // IMPORTANTE: Adicionando os imports
 import { BackHandler, Alert } from 'react-native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator } from '@react-navigation/stack'; // IMPORTANTE: Corrigindo o import
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { navigationRef } from './navigationRef';
 import LoginScreen from '../screens/login/LoginScreen';
@@ -25,11 +25,17 @@ import TurmaDetalhesScreen from '../screens/GerenciamentoAcademico/turma/TurmaDe
 import DisciplinaListScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaListScreen';
 import DisciplinaCreateScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaCreateScreen';
 import DisciplinaDetalhesScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaDetalhesScreen';
+import CoordenadorComunicadoCreateScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoCreateScreen';
+import CoordenadorComunicadoListScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoListScreen';
+import CoordenadorComunicadoDetalhesScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoDetalhesScreen'; // Adicione os imports para as telas de comunicado
+
 
 const Stack = createStackNavigator();
 
+
 const MainNavigator = () => {
   const [userType, setUserType] = useState(null);
+
 
   // Função para login
   const handleLogin = (type) => {
@@ -42,16 +48,18 @@ const MainNavigator = () => {
     );
   };
 
+
   // Função para logout
   const handleLogout = () => {
-    setUserType(null);
+    setUserType(null); // Reseta o tipo de usuário
     navigationRef.current?.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: 'LoginScreen' }],
+        routes: [{ name: 'LoginScreen' }], // Reseta para a tela de login
       })
     );
   };
+
 
   // Configuração do botão "Voltar" do Android
   useEffect(() => {
@@ -67,13 +75,16 @@ const MainNavigator = () => {
       return true;
     };
 
+
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction
     );
 
+
     return () => backHandler.remove();
   }, []);
+
 
   return (
     <NavigationContainer ref={navigationRef}>
@@ -85,6 +96,7 @@ const MainNavigator = () => {
         >
           {(props) => <LoginScreen {...props} onLogin={handleLogin} />}
         </Stack.Screen>
+
 
         {/* Tela genérica de Menu */}
         <Stack.Screen
@@ -109,6 +121,7 @@ const MainNavigator = () => {
             }
           }}
         </Stack.Screen>
+
 
         {/* Telas de Menu */}
         <Stack.Screen
@@ -145,6 +158,7 @@ const MainNavigator = () => {
           options={{ headerShown: false }}
         />
 
+
         {/* Telas de Coordenador */}
         <Stack.Screen
           name="CoordenadorListScreen"
@@ -161,6 +175,7 @@ const MainNavigator = () => {
           component={CoordenadorDetalhesScreen}
           options={{ headerShown: false }}
         />
+
 
         {/* Telas de Professor */}
         <Stack.Screen
@@ -179,6 +194,7 @@ const MainNavigator = () => {
           options={{ headerShown: false }}
         />
 
+
         {/* Telas de Aluno */}
         <Stack.Screen
           name="AlunoListScreen"
@@ -195,6 +211,7 @@ const MainNavigator = () => {
           component={AlunoDetalhesScreen}
           options={{ headerShown: false }}
         />
+
 
         {/* Telas de Turma */}
         <Stack.Screen
@@ -221,6 +238,7 @@ const MainNavigator = () => {
           options={{ headerShown: false }}
         />
 
+
         <Stack.Screen
           name="DisciplinaCreateScreen"
           component={DisciplinaCreateScreen}
@@ -231,10 +249,29 @@ const MainNavigator = () => {
           component={DisciplinaDetalhesScreen}
           options={{ headerShown: false }}
         />
+        
+        {/* Telas de Comunicados */}
+        <Stack.Screen
+          name="ComunicadoCreateScreen"
+          component={CoordenadorComunicadoCreateScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CoordenadorComunicadoListScreen"
+          component={CoordenadorComunicadoListScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CoordenadorComunicadoDetalhesScreen"
+          component={CoordenadorComunicadoDetalhesScreen}
+          options={{ headerShown: false }}
+        />
 
       </Stack.Navigator>
     </NavigationContainer>
   );
+
 };
 
 export default MainNavigator;
