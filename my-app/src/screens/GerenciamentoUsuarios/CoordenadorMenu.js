@@ -11,7 +11,9 @@ const CoordenadorMenu = ({ navigation, handleLogout }) => {
     { title: 'Alunos', icon: 'person', route: 'AlunoListScreen' },
     { title: 'Turmas', icon: 'class', route: 'TurmaListScreen' },
     { title: 'Disciplinas', icon: 'menu-book', route: 'DisciplinaListScreen' },
+    { title: 'Horário', icon: 'schedule', route: 'HorarioScreen' }, // Novo item Horário
     { title: 'Comunicados', icon: 'email', route: 'CoordenadorComunicadoListScreen' },
+        { title: 'Comunicados', icon: 'email', route: 'CoordenadorComunicadoListScreen' },
   ];
 
   return (

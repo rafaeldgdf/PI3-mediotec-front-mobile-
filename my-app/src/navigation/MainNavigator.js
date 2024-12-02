@@ -27,7 +27,7 @@ import DisciplinaCreateScreen from '../screens/GerenciamentoAcademico/disciplina
 import DisciplinaDetalhesScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaDetalhesScreen';
 import CoordenadorComunicadoCreateScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoCreateScreen';
 import CoordenadorComunicadoListScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoListScreen';
-import CoordenadorComunicadoDetalhesScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoDetalhesScreen'; // Adicione os imports para as telas de comunicado
+import HorarioScreen from '../screens/GerenciamentoAcademico/horario/HorarioScreen';
 
 
 const Stack = createStackNavigator();
@@ -237,8 +237,6 @@ const MainNavigator = () => {
           component={DisciplinaListScreen}
           options={{ headerShown: false }}
         />
-
-
         <Stack.Screen
           name="DisciplinaCreateScreen"
           component={DisciplinaCreateScreen}
@@ -252,22 +250,23 @@ const MainNavigator = () => {
         
         {/* Telas de Comunicados */}
         <Stack.Screen
-          name="ComunicadoCreateScreen"
-          component={CoordenadorComunicadoCreateScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
           name="CoordenadorComunicadoListScreen"
           component={CoordenadorComunicadoListScreen}
           initialParams={{ coordenadorCpf: 'cpfPadrao' }}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="CoordenadorComunicadoDetalhesScreen"
-          component={CoordenadorComunicadoDetalhesScreen}
+      <Stack.Screen
+          name="CoordenadorComunicadoCreateScreen"
+          component={CoordenadorComunicadoCreateScreen}
           options={{ headerShown: false }}
         />
 
+      {/* Telas de Horario */}
+        <Stack.Screen
+          name="HorarioScreen"
+          component={HorarioScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
