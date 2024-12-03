@@ -14,12 +14,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../../../api/api';
 import LayoutWrapper from '../../../../components/LayoutWrapper';
 
-const CoordenadorComunicadoListScreen = ({ navigation }) => {
+const ProfessorComunicadoListScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [comunicados, setComunicados] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [coordenadorNome, setCoordenadorNome] = useState('');
-  const [coordenacaoNome, setCoordenacaoNome] = useState('Coordenação não informada');
+  const [professorNome, setProfessorNome] = useState('');
   const [showAllDestinatarios, setShowAllDestinatarios] = useState({});
 
   const fetchComunicados = async () => {
@@ -41,10 +40,9 @@ const CoordenadorComunicadoListScreen = ({ navigation }) => {
         return;
       }
 
-      setCoordenadorNome(`${usuario.nome} ${usuario.ultimoNome}`);
-      setCoordenacaoNome('Coordenação Associada');
+      setProfessorNome(`${usuario.nome} ${usuario.ultimoNome}`);
 
-      const response = await api.get(`/comunicados/coordenador/${usuario.cpf}`);
+      const response = await api.get(`/comunicados/professor/${usuario.cpf}`);
       setComunicados(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar comunicados:', error);
@@ -88,9 +86,7 @@ const CoordenadorComunicadoListScreen = ({ navigation }) => {
       comunicado.titulo?.toLowerCase().includes(searchLower) ||
       comunicado.conteudo?.toLowerCase().includes(searchLower) ||
       comunicado.turmas?.some((turma) => turma.nome.toLowerCase().includes(searchLower)) ||
-      comunicado.alunos?.some((aluno) =>
-        `${aluno.nome} ${aluno.ultimoNome}`.toLowerCase().includes(searchLower)
-      ) ||
+      comunicado.alunos?.some((aluno) => aluno.nome.toLowerCase().includes(searchLower)) ||
       new Date(comunicado.dataEnvio)
         .toLocaleDateString()
         .toLowerCase()
@@ -146,17 +142,22 @@ const CoordenadorComunicadoListScreen = ({ navigation }) => {
   return (
     <LayoutWrapper navigation={navigation} handleLogout={() => navigation.navigate('LoginScreen')}>
       <View style={styles.container}>
+        {/* Cabeçalho */}
         <View style={styles.header}>
           <Icon name="mail-outline" size={28} color="#0056b3" style={styles.headerIcon} />
-          <Text style={styles.headerTitle}>Comunicados de Coord. {coordenadorNome}</Text>
+          <Text style={styles.headerTitle}>Comunicados de Prof. {professorNome}</Text>
         </View>
         <Text style={styles.headerSubtitle}>Visualize e gerencie os comunicados abaixo.</Text>
+
+        {/* Buscador */}
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar comunicado"
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
+
+        {/* Lista de Comunicados */}
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#007BFF" />
@@ -181,24 +182,21 @@ const CoordenadorComunicadoListScreen = ({ navigation }) => {
                   {new Date(item.dataEnvio).toLocaleString()}
                 </Text>
                 <Text style={styles.cardInfo}>
-                  <Icon name="person-circle" size={16} />{' '}
-                  <Text style={styles.bold}>Remetente:</Text> {item.remetente || 'N/A'}
-                </Text>
-                <Text style={styles.cardInfo}>
                   <Icon name="people" size={16} />{' '}
                   <Text style={styles.bold}>Destinatários:</Text>
                 </Text>
                 {formatDestinatarios(item.alunos, item.turmas, item.id)}
               </View>
             )}
-            contentContainerStyle={{ paddingBottom: 80 }}
           />
         ) : (
           <Text style={styles.emptyText}>Nenhum comunicado encontrado.</Text>
         )}
+
+        {/* Botão de Criar Comunicado */}
         <TouchableOpacity
           style={styles.createButton}
-          onPress={() => navigation.navigate('CoordenadorComunicadoCreateScreen')}
+          onPress={() => navigation.navigate('ProfessorComunicadoCreateScreen')}
         >
           <Icon name="add" size={24} color="#FFF" />
           <Text style={styles.createButtonText}>Novo Comunicado</Text>
@@ -260,4 +258,4 @@ const styles = StyleSheet.create({
   createButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold', marginLeft: 8 },
 });
 
-export default CoordenadorComunicadoListScreen;
+export default ProfessorComunicadoListScreen;

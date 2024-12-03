@@ -10,8 +10,8 @@ import {
     Switch,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import LayoutWrapper from '../../../components/LayoutWrapper';
-import api from '../../../api/api';
+import LayoutWrapper from '../../../../components/LayoutWrapper';
+import api from '../../../../api/api';
 
 const TurmaDetalhesScreen = ({ route, navigation }) => {
     const { turma } = route.params;

@@ -19,15 +19,24 @@ import ProfessorDetalhesScreen from '../screens/GerenciamentoUsuarios/professor/
 import AlunoListScreen from '../screens/GerenciamentoUsuarios/aluno/AlunoListScreen';
 import AlunoCreateScreen from '../screens/GerenciamentoUsuarios/aluno/AlunoCreateScreen';
 import AlunoDetalhesScreen from '../screens/GerenciamentoUsuarios/aluno/AlunoDetalhesScreen';
-import TurmaListScreen from '../screens/GerenciamentoAcademico/turma/TurmaListScreen';
-import TurmaCreateScreen from '../screens/GerenciamentoAcademico/turma/TurmaCreateScreen';
-import TurmaDetalhesScreen from '../screens/GerenciamentoAcademico/turma/TurmaDetalhesScreen';
+import TurmaListScreen from '../screens/GerenciamentoAcademico/turma/coordenador/TurmaListScreen';
+import TurmaCreateScreen from '../screens/GerenciamentoAcademico/turma/coordenador/TurmaCreateScreen';
+import TurmaDetalhesScreen from '../screens/GerenciamentoAcademico/turma/coordenador/TurmaDetalhesScreen';
 import DisciplinaListScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaListScreen';
 import DisciplinaCreateScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaCreateScreen';
 import DisciplinaDetalhesScreen from '../screens/GerenciamentoAcademico/disciplina/DisciplinaDetalhesScreen';
 import CoordenadorComunicadoCreateScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoCreateScreen';
 import CoordenadorComunicadoListScreen from '../screens/GerenciamentoAcademico/comunicado/coordenador/CoordenadorComunicadoListScreen';
 import HorarioScreen from '../screens/GerenciamentoAcademico/horario/HorarioScreen';
+import ProfessorComunicadoCreateScreen from '../screens/GerenciamentoAcademico/comunicado/professor/ProfessorComunicadoCreateScreen';
+import ProfessorComunicadoListScreen from '../screens/GerenciamentoAcademico/comunicado/professor/ProfessorComunicadoListScreen';
+import TurmaListProfessorScreen from '../screens/GerenciamentoAcademico/turma/professor/TurmaListProfessorScreen';
+import TurmaDetalhesProfessorScreen from '../screens/GerenciamentoAcademico/turma/professor/TurmaDetalhesProfessorScreen';
+import TurmaDisciplinaListConceitoScreen from '../screens/GerenciamentoAcademico/conceito/professor/TurmaDisciplinaListConceitoScreen';
+import AlunoTurmaListConceitoScreen from '../screens/GerenciamentoAcademico/conceito/professor/AlunoTurmaListConceitoScreen';
+import HelpScreen from '../screens/GerenciamentoAcademico/conceito/professor/HelpScreen';
+import ConceitosDetalhesProfessorScreen from '../screens/GerenciamentoAcademico/conceito/professor/ConceitosDetalhesProfessorScreen';
+
 
 
 const Stack = createStackNavigator();
@@ -247,7 +256,7 @@ const MainNavigator = () => {
           component={DisciplinaDetalhesScreen}
           options={{ headerShown: false }}
         />
-        
+
         {/* Telas de Comunicados */}
         <Stack.Screen
           name="CoordenadorComunicadoListScreen"
@@ -255,18 +264,71 @@ const MainNavigator = () => {
           initialParams={{ coordenadorCpf: 'cpfPadrao' }}
           options={{ headerShown: false }}
         />
-      <Stack.Screen
+        <Stack.Screen
           name="CoordenadorComunicadoCreateScreen"
           component={CoordenadorComunicadoCreateScreen}
           options={{ headerShown: false }}
         />
 
-      {/* Telas de Horario */}
+        {/* Telas de Horario */}
         <Stack.Screen
           name="HorarioScreen"
           component={HorarioScreen}
           options={{ headerShown: false }}
         />
+        {/* Telas de Comunicados */}
+        <Stack.Screen
+          name="ProfessorComunicadoListScreen"
+          component={ProfessorComunicadoListScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ProfessorComunicadoCreateScreen"
+          component={ProfessorComunicadoCreateScreen}
+          options={{ headerShown: false }}
+        />
+
+        {/* Telas de ProfessorTurma */}
+        <Stack.Screen
+          name="TurmaListProfessorScreen"
+          component={TurmaListProfessorScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="TurmaDetalhesProfessorScreen"
+          component={TurmaDetalhesProfessorScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+
+        {/* Telas de ProfessorConceito */}
+        <Stack.Screen
+          name="TurmaDisciplinaListConceitoScreen"
+          component={TurmaDisciplinaListConceitoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AlunoTurmaListConceitoScreen"
+          component={AlunoTurmaListConceitoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="HelpScreen"
+          component={HelpScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ConceitosDetalhesProfessorScreen"
+          component={ConceitosDetalhesProfessorScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

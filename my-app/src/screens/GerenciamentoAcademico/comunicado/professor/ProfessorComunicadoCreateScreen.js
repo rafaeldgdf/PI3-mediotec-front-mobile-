@@ -14,9 +14,9 @@ import Icon from 'react-native-vector-icons/Feather';
 import api from '../../../../api/api';
 import LayoutWrapper from '../../../../components/LayoutWrapper';
 
-const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
-  const [coordenadorCpf, setCoordenadorCpf] = useState(null);
-  const [coordenadorNome, setCoordenadorNome] = useState('');
+const ProfessorComunicadoCreateScreen = ({ navigation }) => {
+  const [professorCpf, setProfessorCpf] = useState(null);
+  const [professorNome, setProfessorNome] = useState('');
   const [titulo, setTitulo] = useState('');
   const [conteudo, setConteudo] = useState('');
   const [turmaSearch, setTurmaSearch] = useState('');
@@ -29,25 +29,25 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
   const [showAllAlunos, setShowAllAlunos] = useState(false);
 
   useEffect(() => {
-    const fetchCoordenadorInfo = async () => {
+    const fetchProfessorInfo = async () => {
       try {
         const userInfo = await AsyncStorage.getItem('userInfo');
         if (userInfo) {
           const parsedInfo = JSON.parse(userInfo);
-          setCoordenadorCpf(parsedInfo.usuario.cpf);
-          setCoordenadorNome(`${parsedInfo.usuario.nome} ${parsedInfo.usuario.ultimoNome}`);
+          setProfessorCpf(parsedInfo.usuario.cpf);
+          setProfessorNome(`${parsedInfo.usuario.nome} ${parsedInfo.usuario.ultimoNome}`);
         } else {
-          Alert.alert('Erro', 'Coordenador não identificado. Faça login novamente.');
+          Alert.alert('Erro', 'Professor não identificado. Faça login novamente.');
           navigation.navigate('LoginScreen');
         }
       } catch (error) {
-        console.error('Erro ao recuperar informações do coordenador:', error.message);
-        Alert.alert('Erro', 'Não foi possível identificar o coordenador.');
+        console.error('Erro ao recuperar informações do professor:', error.message);
+        Alert.alert('Erro', 'Não foi possível identificar o professor.');
         navigation.navigate('LoginScreen');
       }
     };
 
-    fetchCoordenadorInfo();
+    fetchProfessorInfo();
     fetchTurmas();
     fetchAlunos();
   }, []);
@@ -82,33 +82,59 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
 
   const toggleSelectAll = (items, selected, setSelected) => {
     if (selected.length === items.length) {
-      setSelected([]); // Desmarca todos
+      setSelected([]);
     } else {
-      setSelected(items.map((item) => item.id.toString())); // Seleciona todos
+      setSelected(items.map((item) => item.id.toString()));
     }
   };
 
   const handleSave = async () => {
-    if (!conteudo) {
+    if (!conteudo.trim()) {
       Alert.alert('Erro', 'Conteúdo é obrigatório.');
       return;
     }
-
+  
+    // Construindo o payload apenas com os campos esperados
     const payload = {
-      titulo: titulo || null,
-      conteudo,
-      turmaIds: selectedTurmas.map((id) => parseInt(id, 10)),
-      alunoIds: selectedAlunos.map((id) => parseInt(id, 10)),
+      titulo: titulo.trim() || null, // Remover espaços extras no título
+      conteudo: conteudo.trim(),    // Remover espaços extras no conteúdo
+      turmaIds: selectedTurmas.map((id) => parseInt(id, 10)), // IDs das turmas como números
+      alunoIds: selectedAlunos.map((id) => parseInt(id, 10)), // IDs dos alunos como números
     };
-
+  
     try {
-      await api.post(`/comunicados/coordenador/${coordenadorCpf}`, payload);
+      console.log('Enviando payload:', payload); // Log do payload para depuração
+      const response = await api.post(`/comunicados/professor/${professorCpf}`, payload);
+  
+      console.log('Resposta do servidor:', response.data); // Log da resposta
       Alert.alert('Sucesso', 'Comunicado criado com sucesso!');
-      navigation.navigate('CoordenadorComunicadoListScreen');
+      navigation.navigate('ProfessorComunicadoListScreen');
     } catch (error) {
-      console.error('Erro ao criar comunicado:', error.response?.data || error.message);
-      Alert.alert('Erro', error.response?.data?.message || 'Não foi possível criar o comunicado.');
+      console.error('Erro ao criar comunicado:', error?.response?.data || error.message);
+      Alert.alert('Erro', error?.response?.data?.message || 'Não foi possível criar o comunicado.');
     }
+  };
+  
+  const filterTurmas = (turma) => {
+    const searchLower = turmaSearch.toLowerCase();
+    return (
+      turma.nome.toLowerCase().includes(searchLower) ||
+      turma.turno.toLowerCase().includes(searchLower) ||
+      turma.anoEscolar.toString().includes(searchLower)
+    );
+  };
+
+  const filterAlunos = (aluno) => {
+    const searchLower = alunoSearch.toLowerCase();
+    return (
+      aluno.nome.toLowerCase().includes(searchLower) ||
+      aluno.ultimoNome.toLowerCase().includes(searchLower) ||
+      aluno.email.toLowerCase().includes(searchLower) ||
+      aluno.telefones.some(
+        (tel) =>
+          `(${tel.ddd}) ${tel.numero}`.includes(searchLower) || tel.numero.includes(searchLower)
+      )
+    );
   };
 
   return (
@@ -116,7 +142,7 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View>
           <Text style={styles.pageTitle}>Criar Comunicado</Text>
-          <Text style={styles.subTitle}>Coord. {coordenadorNome}</Text>
+          <Text style={styles.subTitle}>Prof. {professorNome}</Text>
         </View>
         <TouchableOpacity onPress={handleSave} style={styles.saveIconButton}>
           <Icon name="send" size={24} color="#FFF" />
@@ -157,34 +183,30 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
         >
           <Text style={styles.link}>Selecionar Todas</Text>
         </TouchableOpacity>
-        <Text style={styles.selectedText}>
+        <Text style={styles.selectedMinimalText}>
           Selecionados: {turmas.filter((turma) => selectedTurmas.includes(turma.id.toString())).map((turma) => turma.nome).join(', ') || 'Nenhuma turma selecionada'}
         </Text>
         {turmas
-          .filter(
-            (turma) =>
-              turma.nome.toLowerCase().includes(turmaSearch.toLowerCase()) ||
-              turma.turno.toLowerCase().includes(turmaSearch.toLowerCase()) ||
-              turma.anoEscolar.toString().includes(turmaSearch)
-          )
+          .filter(filterTurmas)
           .slice(0, showAllTurmas ? turmas.length : 5)
-          .map((item) => (
+          .map((turma) => (
             <CheckBox
-              key={item.id}
+              key={turma.id}
               title={
                 <Text>
-                  <Text style={styles.bold}>{item.nome}</Text> - {item.anoEscolar} -{' '}
-                  <Text style={styles.italic}>{item.turno}</Text>
+                  <Text style={styles.bold}>{turma.nome}</Text> - {turma.anoEscolar} -{' '}
+                  <Text style={styles.italic}>{turma.turno}</Text>
                 </Text>
               }
-              checked={selectedTurmas.includes(item.id.toString())}
-              onPress={() =>
-                toggleSelection(item.id.toString(), selectedTurmas, setSelectedTurmas)
-              }
+              checked={selectedTurmas.includes(turma.id.toString())}
+              onPress={() => toggleSelection(turma.id.toString(), selectedTurmas, setSelectedTurmas)}
             />
           ))}
         {turmas.length > 5 && (
-          <TouchableOpacity onPress={() => setShowAllTurmas(!showAllTurmas)}>
+          <TouchableOpacity
+            onPress={() => setShowAllTurmas(!showAllTurmas)}
+            style={styles.centeredButton}
+          >
             <Text style={styles.link}>{showAllTurmas ? 'Ver Menos' : 'Ver Mais'}</Text>
           </TouchableOpacity>
         )}
@@ -202,48 +224,41 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
         >
           <Text style={styles.link}>Selecionar Todos</Text>
         </TouchableOpacity>
-        <Text style={styles.selectedText}>
+        <Text style={styles.selectedMinimalText}>
           Selecionados: {alunos.filter((aluno) => selectedAlunos.includes(aluno.id.toString()))
             .map((aluno) => `${aluno.nome} ${aluno.ultimoNome}`)
             .join(', ') || 'Nenhum aluno selecionado'}
         </Text>
         {alunos
-          .filter(
-            (aluno) =>
-              aluno.nome.toLowerCase().includes(alunoSearch.toLowerCase()) ||
-              aluno.ultimoNome.toLowerCase().includes(alunoSearch.toLowerCase()) ||
-              aluno.email.toLowerCase().includes(alunoSearch.toLowerCase()) ||
-              aluno.telefones.some((tel) =>
-                `(${tel.ddd}) ${tel.numero}`.includes(alunoSearch) || tel.numero.includes(alunoSearch)
-              )
-          )
+          .filter(filterAlunos)
           .slice(0, showAllAlunos ? alunos.length : 5)
-          .map((item) => (
+          .map((aluno) => (
             <CheckBox
-              key={item.id}
+              key={aluno.id}
               title={
                 <Text>
-                  <Text style={styles.bold}>{item.nome} {item.ultimoNome}</Text>{' '}
-                  <Text style={styles.italic}> - {item.email} </Text> - Tel:{' '}
-                  {item.telefones?.[0]
-                    ? `(${item.telefones[0].ddd}) ${item.telefones[0].numero}`
+                  <Text style={styles.bold}>{aluno.nome} {aluno.ultimoNome}</Text>{' '}
+                  - <Text style={styles.italic}>{aluno.email}</Text>{' '}
+                  - Tel:{' '}
+                  {aluno.telefones?.[0]
+                    ? `(${aluno.telefones[0].ddd}) ${aluno.telefones[0].numero}`
                     : 'N/A'}
                 </Text>
               }
-              checked={selectedAlunos.includes(item.id.toString())}
-              onPress={() =>
-                toggleSelection(item.id.toString(), selectedAlunos, setSelectedAlunos)
-              }
+              checked={selectedAlunos.includes(aluno.id.toString())}
+              onPress={() => toggleSelection(aluno.id.toString(), selectedAlunos, setSelectedAlunos)}
             />
           ))}
         {alunos.length > 5 && (
-          <TouchableOpacity onPress={() => setShowAllAlunos(!showAllAlunos)}>
+          <TouchableOpacity
+            onPress={() => setShowAllAlunos(!showAllAlunos)}
+            style={styles.centeredButton}
+          >
             <Text style={styles.link}>{showAllAlunos ? 'Ver Menos' : 'Ver Mais'}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
 
-      {/* Botão fixo na parte inferior */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Salvar Comunicado</Text>
       </TouchableOpacity>
@@ -253,71 +268,9 @@ const CoordenadorComunicadoCreateScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    padding: 8,
+    padding: 16,
     backgroundColor: '#F4F4F4',
-    paddingBottom: 100, // Espaço para o botão fixo
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0056b3',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    height: 50,
-    fontSize: 14,
-  },
-  textarea: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-    height: 100,
-    fontSize: 14,
-    textAlignVertical: 'top',
-  },
-  saveButton: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: '#28A745',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  selectedText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
-    marginBottom: 12,
-  },
-  link: {
-    color: '#0056b3',
-    fontWeight: 'bold',
-    marginVertical: 8,
-    textAlign: 'center',
-  },
-  bold: {
-    fontWeight: 'bold',
-  },
-  italic: {
-    fontStyle: 'italic',
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
@@ -336,10 +289,72 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0056b3',
+    marginVertical: 8,
+  },
+  input: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    fontSize: 14,
+  },
+  textarea: {
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  selectedText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  selectedMinimalText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  italic: {
+    fontStyle: 'italic',
+  },
+  link: {
+    color: '#0056b3',
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
   saveIconButton: {
     backgroundColor: '#28A745',
     borderRadius: 20,
     padding: 10,
+  },
+  saveButton: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    backgroundColor: '#28a745',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   centeredButton: {
     justifyContent: 'center',
@@ -349,4 +364,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CoordenadorComunicadoCreateScreen;
+export default ProfessorComunicadoCreateScreen;

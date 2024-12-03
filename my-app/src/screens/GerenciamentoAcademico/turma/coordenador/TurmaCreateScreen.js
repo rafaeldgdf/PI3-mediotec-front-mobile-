@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import { Picker } from '@react-native-picker/picker';
-import api from '../../../api/api';
-import LayoutWrapper from '../../../components/LayoutWrapper';
+import api from '../../../../api/api';
+import LayoutWrapper from '../../../../components/LayoutWrapper';
 
 const TurmaCreateScreen = ({ navigation }) => {
     const [anoLetivo, setAnoLetivo] = useState('');

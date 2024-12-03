@@ -13,7 +13,6 @@ const CoordenadorMenu = ({ navigation, handleLogout }) => {
     { title: 'Disciplinas', icon: 'menu-book', route: 'DisciplinaListScreen' },
     { title: 'Horário', icon: 'schedule', route: 'HorarioScreen' }, // Novo item Horário
     { title: 'Comunicados', icon: 'email', route: 'CoordenadorComunicadoListScreen' },
-        { title: 'Comunicados', icon: 'email', route: 'CoordenadorComunicadoListScreen' },
   ];
 
   return (

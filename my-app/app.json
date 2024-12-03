@@ -18,7 +18,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -26,6 +30,6 @@
     "plugins": [
       "expo-font"
     ],
-    "sdkVersion": "52.0.0" 
+    "sdkVersion": "52.0.0"
   }
 }
