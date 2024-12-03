@@ -36,7 +36,9 @@ import TurmaDisciplinaListConceitoScreen from '../screens/GerenciamentoAcademico
 import AlunoTurmaListConceitoScreen from '../screens/GerenciamentoAcademico/conceito/professor/AlunoTurmaListConceitoScreen';
 import HelpScreen from '../screens/GerenciamentoAcademico/conceito/professor/HelpScreen';
 import ConceitosDetalhesProfessorScreen from '../screens/GerenciamentoAcademico/conceito/professor/ConceitosDetalhesProfessorScreen';
-
+import SelecaoTurmaDisciplinaScreen from '../screens/GerenciamentoAcademico/presença/professor/SelecaoTurmaDisciplinaScreen';
+import RegistroPresencaScreen from '../screens/GerenciamentoAcademico/presença/professor/RegistroPresencaScreen'
+import HistoricoChamadaScreen from '../screens/GerenciamentoAcademico/presença/professor/HistoricoChamadaScreen';
 
 
 const Stack = createStackNavigator();
@@ -329,7 +331,30 @@ const MainNavigator = () => {
           options={{ headerShown: false }}
         />
 
+        {/* Telas de ProfessorPresença */}
+        <Stack.Screen
+          name="SelecaoTurmaDisciplinaScreen"
+          component={SelecaoTurmaDisciplinaScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="RegistroPresencaScreen"
+          component={RegistroPresencaScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="HistoricoChamadaScreen"
+          component={HistoricoChamadaScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+
+
       </Stack.Navigator>
+
+
     </NavigationContainer>
   );
 

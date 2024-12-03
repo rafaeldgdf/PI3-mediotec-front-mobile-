@@ -5,7 +5,7 @@ import LayoutWrapper from '../../components/LayoutWrapper';
 
 const ProfessorMenu = ({ navigation, handleLogout }) => {
   const menuItems = [
-    { title: 'Presença', icon: 'check-circle', route: 'ProfessorPresencaScreen' },
+    { title: 'Presença', icon: 'check-circle', route: 'SelecaoTurmaDisciplinaScreen' },
     { title: 'Conceitos', icon: 'school', route: 'TurmaDisciplinaListConceitoScreen' },
     { title: 'Turmas', icon: 'class', route: 'TurmaListProfessorScreen' }, 
     { title: 'Comunicados', icon: 'email', route: 'ProfessorComunicadoListScreen' }
