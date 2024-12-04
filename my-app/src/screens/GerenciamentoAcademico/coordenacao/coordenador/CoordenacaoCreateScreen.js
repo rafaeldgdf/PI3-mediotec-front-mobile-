@@ -11,8 +11,8 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { CheckBox } from 'react-native-elements';
-import api from '../../../api/api';
-import LayoutWrapper from '../../../components/LayoutWrapper';
+import LayoutWrapper from '../../../../components/LayoutWrapper';
+import api from '../../../../api/api';
 
 const CoordenacaoCreateScreen = ({ route, navigation }) => {
   const { coordenacao } = route.params || {}; // Recebe coordenação para edição, caso exista

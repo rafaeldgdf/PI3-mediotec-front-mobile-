@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import api from '../../../api/api';
-import LayoutWrapper from '../../../components/LayoutWrapper';
+import api from '../../../../api/api';
+import LayoutWrapper from '../../../../components/LayoutWrapper';
 
 const CoordenacaoListScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');

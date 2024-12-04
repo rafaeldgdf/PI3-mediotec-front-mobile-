@@ -5,13 +5,14 @@ import LayoutWrapper from '../../components/LayoutWrapper';
 
 const CoordenadorMenu = ({ navigation, handleLogout }) => {
   const menuItems = [
+    { title: 'Perfil', icon: 'person-outline', route: 'PerfilScreen' }, // Aba Perfil
     { title: 'Coordenação', icon: 'work', route: 'CoordenacaoListScreen' },
     { title: 'Coordenadores', icon: 'supervisor-account', route: 'CoordenadorListScreen' },
     { title: 'Professores', icon: 'school', route: 'ProfessorListScreen' },
     { title: 'Alunos', icon: 'person', route: 'AlunoListScreen' },
     { title: 'Turmas', icon: 'class', route: 'TurmaListScreen' },
     { title: 'Disciplinas', icon: 'menu-book', route: 'DisciplinaListScreen' },
-    { title: 'Horário', icon: 'schedule', route: 'HorarioScreen' }, // Novo item Horário
+    { title: 'Horário', icon: 'schedule', route: 'HorarioScreen' },
     { title: 'Comunicados', icon: 'email', route: 'CoordenadorComunicadoListScreen' },
   ];
 
@@ -49,11 +50,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#0056b3', // Azul do padrão SGE
+    color: '#0056b3',
     textAlign: 'center',
     marginVertical: 20,
     textTransform: 'uppercase',
-    letterSpacing: 1, // Espaçamento entre letras para um toque moderno
+    letterSpacing: 1,
   },
   scrollContainer: {
     paddingHorizontal: 16,
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
   menuButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007BFF', // Azul padrão
+    backgroundColor: '#007BFF',
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -77,16 +78,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#0056b3', // Azul escuro para destaque
+    backgroundColor: '#0056b3',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
   },
   menuButtonText: {
     fontSize: 18,
-    color: '#FFFFFF', // Texto branco no botão
+    color: '#FFFFFF',
     fontWeight: '600',
-    textTransform: 'capitalize', // Deixa o título com a primeira letra maiúscula
+    textTransform: 'capitalize',
   },
 });
 

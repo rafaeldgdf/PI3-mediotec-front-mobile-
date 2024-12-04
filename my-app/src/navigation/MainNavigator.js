@@ -37,8 +37,15 @@ import AlunoTurmaListConceitoScreen from '../screens/GerenciamentoAcademico/conc
 import HelpScreen from '../screens/GerenciamentoAcademico/conceito/professor/HelpScreen';
 import ConceitosDetalhesProfessorScreen from '../screens/GerenciamentoAcademico/conceito/professor/ConceitosDetalhesProfessorScreen';
 import SelecaoTurmaDisciplinaScreen from '../screens/GerenciamentoAcademico/presença/professor/SelecaoTurmaDisciplinaScreen';
-import RegistroPresencaScreen from '../screens/GerenciamentoAcademico/presença/professor/RegistroPresencaScreen'
+import RegistroPresencaScreen from '../screens/GerenciamentoAcademico/presença/professor/RegistroPresencaScreen';
 import HistoricoChamadaScreen from '../screens/GerenciamentoAcademico/presença/professor/HistoricoChamadaScreen';
+import TurmaAlunoScreen from '../screens/GerenciamentoAcademico/turma/aluno/TurmaAlunoScreen';
+import AlunoComunicadoListScreen from '../screens/GerenciamentoAcademico/comunicado/aluno/AlunoComunicadoListScreen';
+import ConceitosAlunoScreen from '../screens/GerenciamentoAcademico/conceito/aluno/ConceitosAlunoScreen';
+import PresencaPorAlunoScreen from '../screens/GerenciamentoAcademico/presença/aluno/PresencaPorAlunoScreen';
+import PerfilAlunoScreen from '../screens/GerenciamentoAcademico/perfil/PerfilAlunoScreen';
+import CoordenacaoAlunoScreen from '../screens/GerenciamentoAcademico/coordenacao/aluno/CoordenacaoAlunoScreen';
+import FinanceiroScreen from '../screens/GerenciamentoAcademico/FinanceiroScreen';
 
 
 const Stack = createStackNavigator();
@@ -347,6 +354,50 @@ const MainNavigator = () => {
         <Stack.Screen
           name="HistoricoChamadaScreen"
           component={HistoricoChamadaScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+
+        {/* Telas de Turma Aluno */}
+        <Stack.Screen
+          name="TurmaAlunoScreen"
+          component={TurmaAlunoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AlunoComunicadoListScreen"
+          component={AlunoComunicadoListScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ConceitosAlunoScreen"
+          component={ConceitosAlunoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PresencaPorAlunoScreen"
+          component={PresencaPorAlunoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PerfilAlunoScreen"
+          component={PerfilAlunoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CoordenacaoAlunoScreen"
+          component={CoordenacaoAlunoScreen}
+          initialParams={{ coordenadorCpf: 'cpfPadrao' }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="FinanceiroScreen"
+          component={FinanceiroScreen}
           initialParams={{ coordenadorCpf: 'cpfPadrao' }}
           options={{ headerShown: false }}
         />

@@ -5,14 +5,21 @@ import LayoutWrapper from '../../components/LayoutWrapper';
 
 const AlunoMenu = ({ navigation, handleLogout }) => {
   const menuItems = [
-    { title: 'Conceitos', icon: 'school', route: 'Conceitos' },
-    { title: 'Presença', icon: 'check-circle', route: 'Presenca' },
-    { title: 'Comunicados', icon: 'email', route: 'Comunicados' },
+    { title: 'Perfil', icon: 'person-outline', route: 'PerfilAlunoScreen' }, // Aba Perfil adicionada
+    { title: 'Comunicados', icon: 'email', route: 'AlunoComunicadoListScreen' },
+    { title: 'Conceitos', icon: 'school', route: 'ConceitosAlunoScreen' },
+    { title: 'Presença', icon: 'check-circle', route: 'PresencaPorAlunoScreen' },
+    { title: 'Coordenação', icon: 'work', route: 'CoordenacaoAlunoScreen' },
+    { title: 'Turma', icon: 'group', route: 'TurmaAlunoScreen' }, // Opção Turma
+    { title: 'Financeiro', icon: 'attach-money', route: 'FinanceiroScreen' }, // Opção Financeiro
   ];
 
   return (
     <LayoutWrapper navigation={navigation} handleLogout={handleLogout}>
+      {/* Título do Menu */}
       <Text style={styles.title}>Menu do Aluno</Text>
+
+      {/* Menu de Navegação */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {menuItems.map((item) => (
           <TouchableOpacity
