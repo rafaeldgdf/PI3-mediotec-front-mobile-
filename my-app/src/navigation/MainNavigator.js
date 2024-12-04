@@ -7,9 +7,9 @@ import LoginScreen from '../screens/login/LoginScreen';
 import AlunoMenu from '../screens/GerenciamentoUsuarios/AlunoMenu';
 import ProfessorMenu from '../screens/GerenciamentoUsuarios/ProfessorMenu';
 import CoordenadorMenu from '../screens/GerenciamentoUsuarios/CoordenadorMenu';
-import CoordenacaoListScreen from '../screens/GerenciamentoUsuarios/coordenacao/CoordenacaoListScreen';
-import CoordenacaoCreateScreen from '../screens/GerenciamentoUsuarios/coordenacao/CoordenacaoCreateScreen';
-import CoordenacaoDetalhesScreen from '../screens/GerenciamentoUsuarios/coordenacao/CoordenacaoDetalhesScreen';
+import CoordenacaoListScreen from '../screens/GerenciamentoAcademico/coordenacao/coordenador/CoordenacaoListScreen';
+import CoordenacaoCreateScreen from '../screens/GerenciamentoAcademico/coordenacao/coordenador/CoordenacaoCreateScreen';
+import CoordenacaoDetalhesScreen from '../screens/GerenciamentoAcademico/coordenacao/coordenador/CoordenacaoDetalhesScreen';
 import CoordenadorListScreen from '../screens/GerenciamentoUsuarios/coordenador/CoordenadorListScreen';
 import CoordenadorCreateScreen from '../screens/GerenciamentoUsuarios/coordenador/CoordenadorCreateScreen';
 import CoordenadorDetalhesScreen from '../screens/GerenciamentoUsuarios/coordenador/CoordenadorDetalhesScreen';
@@ -46,7 +46,6 @@ import PresencaPorAlunoScreen from '../screens/GerenciamentoAcademico/presença/
 import PerfilAlunoScreen from '../screens/GerenciamentoAcademico/perfil/PerfilAlunoScreen';
 import CoordenacaoAlunoScreen from '../screens/GerenciamentoAcademico/coordenacao/aluno/CoordenacaoAlunoScreen';
 import FinanceiroScreen from '../screens/GerenciamentoAcademico/FinanceiroScreen';
-
 
 const Stack = createStackNavigator();
 
