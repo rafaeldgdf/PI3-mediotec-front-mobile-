@@ -86,7 +86,7 @@ const SelecaoTurmaDisciplinaScreen = ({ navigation }) => {
             {/* Cabeçalho */}
             <View style={styles.header}>
                 <Text style={styles.pageTitle}>
-                    <Icon name="list" size={24} color="#0056b3" /> Seleção de Turmas e Disciplinas
+                    <Icon name="check-circle" size={24} color="#0056b3" /> Registro de Presenças do Prof. {nomeProfessor} {ultimoNomeProfessor}
                 </Text>
                 <Text style={styles.subtitle}>Escolha a turma e disciplina para registrar presenças.</Text>
             </View>

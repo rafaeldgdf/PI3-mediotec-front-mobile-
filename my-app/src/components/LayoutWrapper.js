@@ -10,7 +10,23 @@ import {
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LayoutWrapper = ({ children, navigation, handleLogout }) => {
+const LayoutWrapper = ({ children, navigation }) => {
+  const handleLogout = async () => {
+    try {
+      // Limpa os dados do AsyncStorage
+      await AsyncStorage.removeItem("userInfo");
+
+      // Reseta a navegação para ir à tela de login
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LoginScreen" }],
+      });
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      Alert.alert("Erro", "Não foi possível realizar o logout.");
+    }
+  };
+
   const confirmLogout = () => {
     Alert.alert(
       "Confirmação",
@@ -19,7 +35,7 @@ const LayoutWrapper = ({ children, navigation, handleLogout }) => {
         { text: "Cancelar", style: "cancel" },
         {
           text: "Sair",
-          onPress: handleLogout,
+          onPress: handleLogout, // Chama diretamente o handleLogout
         },
       ],
       { cancelable: true }

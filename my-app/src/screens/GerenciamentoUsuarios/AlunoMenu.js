@@ -11,6 +11,7 @@ const AlunoMenu = ({ navigation, handleLogout }) => {
     { title: 'Presença', icon: 'check-circle', route: 'PresencaPorAlunoScreen' },
     { title: 'Coordenação', icon: 'work', route: 'CoordenacaoAlunoScreen' },
     { title: 'Turma', icon: 'group', route: 'TurmaAlunoScreen' }, // Opção Turma
+    { title: 'Horário', icon: 'schedule', route: 'AlunoHorarioScreen' },
     { title: 'Financeiro', icon: 'attach-money', route: 'FinanceiroScreen' }, // Opção Financeiro
   ];
 

@@ -48,6 +48,7 @@ import CoordenacaoAlunoScreen from "../screens/GerenciamentoAcademico/coordenaca
 import FinanceiroScreen from "../screens/GerenciamentoAcademico/FinanceiroScreen";
 import PerfilCoordenadorScreen from "../screens/GerenciamentoAcademico/perfil/PerfilCoordenadorScreen";
 import PerfilProfessorScreen from "../screens/GerenciamentoAcademico/perfil/PerfilProfessorScreen";
+import AlunoHorarioScreen from "../screens/GerenciamentoAcademico/horario/AlunoHorarioScreen";
 
 const Stack = createStackNavigator();
 
@@ -386,6 +387,12 @@ const MainNavigator = () => {
         <Stack.Screen
           name="PerfilProfessorScreen"
           component={PerfilProfessorScreen}
+          initialParams={{ coordenadorCpf: "cpfPadrao" }}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AlunoHorarioScreen"
+          component={AlunoHorarioScreen}
           initialParams={{ coordenadorCpf: "cpfPadrao" }}
           options={{ headerShown: false }}
         />

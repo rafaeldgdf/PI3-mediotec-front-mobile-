@@ -38,11 +38,14 @@ const HistoricoChamadaScreen = ({ route, navigation }) => {
                 `/presencas/historico/turma/${turmaId}/disciplina/${disciplinaId}`
             );
     
-            // Certifique-se de que a resposta contém todos os alunos
-            console.log('Resposta completa do backend:', response.data);
+            // Ordena os alunos por nome em cada registro de data
+            const historicoOrdenado = response.data.map((registro) => ({
+                ...registro,
+                alunos: registro.alunos.sort((a, b) => a.nome.localeCompare(b.nome)),
+            }));
     
-            setHistorico(response.data); // Atualize a lista completa
-            setFilteredHistorico(response.data); // Atualize também a lista filtrada
+            setHistorico(historicoOrdenado);
+            setFilteredHistorico(historicoOrdenado);
         } catch (error) {
             console.error('Erro ao buscar histórico:', error);
             Alert.alert('Erro', 'Não foi possível carregar o histórico de chamadas.');
@@ -50,6 +53,7 @@ const HistoricoChamadaScreen = ({ route, navigation }) => {
             setLoading(false);
         }
     };
+    
     
 
     /**

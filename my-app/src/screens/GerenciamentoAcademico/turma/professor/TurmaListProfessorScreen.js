@@ -20,6 +20,7 @@ const TurmaListProfessorScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [nomeProfessor, setNomeProfessor] = useState('');
     const [ultimoNomeProfessor, setUltimoNomeProfessor] = useState('');
+    const [visibleTurmas, setVisibleTurmas] = useState(5); // Limite inicial de turmas visíveis
 
     useEffect(() => {
         recuperarDadosProfessor();
@@ -68,7 +69,10 @@ const TurmaListProfessorScreen = ({ navigation }) => {
                 return { ...turma, disciplinas: disciplinasDaTurma };
             });
 
-            setTurmas(turmasComDisciplinas);
+            // Ordena as turmas por nome
+            setTurmas(
+                turmasComDisciplinas.sort((a, b) => a.nome.localeCompare(b.nome))
+            );
         } catch (error) {
             console.error('Erro ao buscar turmas e disciplinas do professor:', error);
             Alert.alert('Erro', 'Falha ao carregar as turmas e disciplinas do professor.');
@@ -88,6 +92,13 @@ const TurmaListProfessorScreen = ({ navigation }) => {
             turma.disciplinas.some((disciplina) => disciplina.toLowerCase().includes(searchLower)) // Busca nas disciplinas
         );
     });
+
+    /**
+     * Função para exibir mais turmas
+     */
+    const handleVerMais = () => {
+        setVisibleTurmas((prev) => prev + 5); // Incrementa o limite visível em 5
+    };
 
     return (
         <LayoutWrapper navigation={navigation} handleLogout={() => navigation.navigate('LoginScreen')}>
@@ -117,7 +128,7 @@ const TurmaListProfessorScreen = ({ navigation }) => {
                 </View>
             ) : filteredTurmas.length > 0 ? (
                 <FlatList
-                    data={filteredTurmas}
+                    data={filteredTurmas.slice(0, visibleTurmas)} // Exibe apenas o limite de turmas visíveis
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.card}>
@@ -153,6 +164,13 @@ const TurmaListProfessorScreen = ({ navigation }) => {
                             </View>
                         </View>
                     )}
+                    ListFooterComponent={
+                        filteredTurmas.length > visibleTurmas ? (
+                            <TouchableOpacity onPress={handleVerMais}>
+                                <Text style={styles.verMais}>Ver Mais</Text>
+                            </TouchableOpacity>
+                        ) : null
+                    }
                 />
             ) : (
                 <Text style={styles.emptyText}>Nenhuma turma encontrada.</Text>

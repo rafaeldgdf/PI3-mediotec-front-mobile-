@@ -86,42 +86,91 @@ const PerfilCoordenadorScreen = ({ navigation }) => {
     );
   }
 
+  const handlePickImage = async () => {
+    try {
+      const options = [
+        {
+          text: 'Selecionar da Galeria',
+          onPress: async () => {
+            const result = await ImagePicker.launchImageLibraryAsync({
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 1,
+            });
+            if (!result.canceled) {
+              setProfileImage(result.assets[0].uri || null);
+            }
+          },
+        },
+        {
+          text: 'Tirar Foto',
+          onPress: async () => {
+            const result = await ImagePicker.launchCameraAsync({
+              allowsEditing: true,
+              aspect: [1, 1],
+              quality: 1,
+            });
+            if (!result.canceled) {
+              setProfileImage(result.assets[0].uri || null);
+            }
+          },
+        },
+        { text: 'Cancelar', style: 'cancel' },
+      ];
+      Alert.alert('Imagem do Perfil', 'Selecione uma opção:', options);
+    } catch (error) {
+      console.error('Erro ao selecionar a imagem:', error);
+      Alert.alert('Erro', 'Não foi possível selecionar a imagem.');
+    }
+  };
+
   return (
     <LayoutWrapper navigation={navigation}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.profilePicture}>
-            {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.profileImage} />
-            ) : (
-              <Icon name="camera-alt" size={40} color="#FFF" />
-            )}
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.profilePicture} onPress={handlePickImage}>
+              {profileImage && typeof profileImage === 'string' ? (
+                <Image source={{ uri: profileImage }} style={styles.profileImage} />
+              ) : (
+                <Icon name="camera-alt" size={40} color="#FFF" />
+              )}
+            </TouchableOpacity>
           <Text style={styles.profileName}>
             {detalhesCoordenador.nome} {detalhesCoordenador.ultimoNome}
           </Text>
           <Text style={styles.profileRole}>Coordenador</Text>
         </View>
 
-        {/* Informações Pessoais */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            <Icon name="info" size={18} /> Informações Pessoais
-          </Text>
-          <Text style={styles.infoText}>
-            <Icon name="badge" size={16} /> <Text style={styles.bold}>Nome:</Text>{' '}
-            {detalhesCoordenador.nome} {detalhesCoordenador.ultimoNome}
-          </Text>
-          <Text style={styles.infoText}>
-            <Icon name="fingerprint" size={16} /> <Text style={styles.bold}>CPF:</Text>{' '}
-            {detalhesCoordenador.cpf}
-          </Text>
-          <Text style={styles.infoText}>
-            <Icon name="email" size={16} /> <Text style={styles.bold}>Email:</Text>{' '}
-            {detalhesCoordenador.email || 'Não informado'}
-          </Text>
-        </View>
+          {/* Informações Pessoais */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              <Icon name="info" size={18} /> Informações Pessoais
+            </Text>
+            <Text style={styles.infoText}>
+              <Icon name="badge" size={16} /> <Text style={styles.bold}>Nome:</Text>{' '}
+              {detalhesCoordenador.nome} {detalhesCoordenador.ultimoNome}
+            </Text>
+            <Text style={styles.infoText}>
+              <Icon name="badge" size={16} /> <Text style={styles.bold}>CPF:</Text>{' '}
+              {detalhesCoordenador.cpf}
+            </Text>
+            <Text style={styles.infoText}>
+              <Icon name="email" size={16} /> <Text style={styles.bold}>Email:</Text>{' '}
+              {detalhesCoordenador.email || 'Não informado'}
+            </Text>
+            <Text style={styles.infoText}>
+              <Icon name="wc" size={16} /> <Text style={styles.bold}>Gênero:</Text>{' '}
+              {detalhesCoordenador.genero || 'Não informado'}
+            </Text>
+            <Text style={styles.infoText}>
+              <Icon name="calendar-today" size={16} />{' '}
+              <Text style={styles.bold}>Data de Nascimento:</Text>{' '}
+              {detalhesCoordenador.data_nascimento
+                ? format(new Date(detalhesCoordenador.data_nascimento), 'dd/MM/yyyy')
+                : 'Não informado'}
+            </Text>
+            </View>
 
         {/* Endereços */}
         <View style={styles.section}>

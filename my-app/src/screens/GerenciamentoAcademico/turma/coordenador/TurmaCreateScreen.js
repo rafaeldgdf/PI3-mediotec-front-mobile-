@@ -5,7 +5,6 @@ import {
     TextInput,
     TouchableOpacity,
     FlatList,
-    ScrollView,
     Alert,
     StyleSheet,
 } from 'react-native';
@@ -22,18 +21,14 @@ const TurmaCreateScreen = ({ navigation }) => {
     const [coordenacaoId, setCoordenacaoId] = useState('');
     const [alunosSelecionados, setAlunosSelecionados] = useState([]);
     const [professoresSelecionados, setProfessoresSelecionados] = useState([]);
-    const [disciplinasSelecionadas, setDisciplinasSelecionadas] = useState([]);
-
+    const [associacaoDisciplinasProfessores, setAssociacaoDisciplinasProfessores] = useState([]);
     const [coordenacoes, setCoordenacoes] = useState([]);
     const [professores, setProfessores] = useState([]);
     const [disciplinas, setDisciplinas] = useState([]);
     const [alunos, setAlunos] = useState([]);
-
     const [professorSearch, setProfessorSearch] = useState('');
-    const [disciplinaSearch, setDisciplinaSearch] = useState('');
     const [alunoSearch, setAlunoSearch] = useState('');
-    const [coordenacaoSearch, setCoordenacaoSearch] = useState('');
-
+    const [alunosExibidos, setAlunosExibidos] = useState(5);
 
     useEffect(() => {
         fetchData();
@@ -48,10 +43,10 @@ const TurmaCreateScreen = ({ navigation }) => {
                 api.get('/alunos'),
             ]);
 
-            setCoordenacoes(coordenacoesRes.data);
-            setProfessores(professoresRes.data);
-            setDisciplinas(disciplinasRes.data);
-            setAlunos(alunosRes.data);
+            setCoordenacoes(coordenacoesRes.data.sort((a, b) => a.nome.localeCompare(b.nome)));
+            setProfessores(professoresRes.data.sort((a, b) => a.nome.localeCompare(b.nome)));
+            setDisciplinas(disciplinasRes.data.sort((a, b) => a.nome.localeCompare(b.nome)));
+            setAlunos(alunosRes.data.sort((a, b) => a.nome.localeCompare(b.nome)));
         } catch (error) {
             console.error('Erro ao carregar dados:', error);
             Alert.alert('Erro', 'Falha ao carregar os dados.');
@@ -66,35 +61,54 @@ const TurmaCreateScreen = ({ navigation }) => {
         }
     };
 
+    const associarDisciplinaAProfessor = (professorId, disciplinaId) => {
+        setAssociacaoDisciplinasProfessores((prev) => {
+            const index = prev.findIndex((assoc) => assoc.professorId === professorId);
+
+            if (index >= 0) {
+                const disciplinasAtualizadas = prev[index].disciplinasIds.includes(disciplinaId)
+                    ? prev[index].disciplinasIds.filter((id) => id !== disciplinaId) // Desmarca se já está selecionado
+                    : [...prev[index].disciplinasIds, disciplinaId]; // Marca a disciplina
+
+                const novaLista = [...prev];
+                novaLista[index] = { ...novaLista[index], disciplinasIds: disciplinasAtualizadas };
+                return novaLista;
+            } else {
+                return [...prev, { professorId, disciplinasIds: [disciplinaId] }];
+            }
+        });
+    };
+
+
+
+    const handleVerMais = (setExibidos, atual) => {
+        setExibidos(atual + 10);
+    };
+
+    const handleVerMenos = (setExibidos, atual) => {
+        setExibidos(Math.max(atual - 10, 5));
+    };
     const handleSave = async () => {
-        // Verificação apenas dos campos obrigatórios
         if (!anoLetivo || !anoEscolar || !turno || !coordenacaoId) {
             Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
             return;
         }
-    
-        // Construção do payload com listas opcionais
+
         const payload = {
             anoLetivo: parseInt(anoLetivo, 10),
             anoEscolar,
             turno,
             status,
             coordenacaoId: parseInt(coordenacaoId, 10),
-            alunosIds: alunosSelecionados.length > 0 
-                ? alunosSelecionados.map((id) => parseInt(id, 10)) 
-                : [], // Lista vazia se nenhum aluno foi selecionado
-            disciplinasProfessores: professoresSelecionados.length > 0 
-                ? professoresSelecionados.map((professorId) => ({
-                    professorId,
-                    disciplinasIds: disciplinasSelecionadas.length > 0 
-                        ? disciplinasSelecionadas.map((id) => parseInt(id, 10)) 
-                        : [], // Lista vazia se nenhuma disciplina foi selecionada
-                }))
-                : [], // Lista vazia se nenhum professor foi selecionado
+            alunosIds: alunosSelecionados.map((id) => parseInt(id, 10)),
+            disciplinasProfessores: associacaoDisciplinasProfessores.map((assoc) => ({
+                professorId: assoc.professorId,
+                disciplinasIds: assoc.disciplinasIds,
+            })),
         };
-    
-        console.log('Payload enviado para o backend:', JSON.stringify(payload, null, 2));
-    
+
+        console.log('Payload enviado:', payload);
+
         try {
             await api.post('/turmas', payload);
             Alert.alert('Sucesso', 'Turma criada com sucesso!');
@@ -103,180 +117,163 @@ const TurmaCreateScreen = ({ navigation }) => {
             console.error('Erro ao criar turma:', error.response?.data || error.message);
             Alert.alert('Erro', 'Falha ao criar a turma. Verifique os dados.');
         }
-    };  
+    };
 
     return (
         <LayoutWrapper navigation={navigation}>
-            <ScrollView nestedScrollEnabled={true} style={styles.container}>
-                <Text style={styles.title}>Cadastro de Turma</Text>
-
-                {/* Ano Letivo */}
-                <Text style={styles.sectionTitle}>Ano Letivo *</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Digite o Ano Letivo (ex: 2024)"
-                    value={anoLetivo}
-                    onChangeText={setAnoLetivo}
-                    keyboardType="numeric"
-                />
-
-                {/* Ano Escolar */}
-                <Text style={styles.sectionTitle}>Ano Escolar *</Text>
-                <Picker
-                    selectedValue={anoEscolar}
-                    style={styles.input}
-                    onValueChange={(itemValue) => setAnoEscolar(itemValue)}
-                >
-                    <Picker.Item label="Selecione o Ano Escolar" value="" />
-                    <Picker.Item label="1º ano" value="1º ano" />
-                    <Picker.Item label="2º ano" value="2º ano" />
-                    <Picker.Item label="3º ano" value="3º ano" />
-                </Picker>
-
-
-                {/* Turno */}
-                <Text style={styles.sectionTitle}>Turno *</Text>
-                <Picker
-                    selectedValue={turno}
-                    style={styles.input}
-                    onValueChange={setTurno}
-                >
-                    <Picker.Item label="Selecione o Turno" value="" />
-                    <Picker.Item label="Matutino" value="Matutino" />
-                    <Picker.Item label="Vespertino" value="Vespertino" />
-                    <Picker.Item label="Noturno" value="Noturno" />
-                </Picker>
-                {/* Coordenação */}
-                <Text style={styles.sectionTitle}>Selecione uma Coordenação *</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Buscar Coordenação"
-                    value={coordenacaoSearch}
-                    onChangeText={setCoordenacaoSearch}
-                />
-                <FlatList
-                    data={coordenacoes.filter((coord) =>
-                        coord.nome.toLowerCase().includes(coordenacaoSearch.toLowerCase())
-                    )}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <CheckBox
-                            title={item.nome}
-                            checked={coordenacaoId === item.id.toString()}
-                            onPress={() => setCoordenacaoId(item.id.toString())}
+            <FlatList
+                data={professores}
+                keyExtractor={(item) => item.cpf}
+                ListHeaderComponent={(
+                    <View style={styles.container}>
+                        <Text style={styles.title}>Cadastro de Turma</Text>
+    
+                        {/* Ano Letivo */}
+                        <Text style={styles.sectionTitle}>Ano Letivo *</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Digite o Ano Letivo (ex: 2024)"
+                            value={anoLetivo}
+                            onChangeText={setAnoLetivo}
+                            keyboardType="numeric"
                         />
-                    )}
-                />
-                <Text style={styles.selectedText}>
-                    Selecionada: {coordenacoes.find((coord) => coord.id.toString() === coordenacaoId)?.nome || 'Nenhuma'}
-                </Text>
-
-
-                {/* Alunos */}
-                <Text style={styles.sectionTitle}>Alunos</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Buscar Aluno"
-                    value={alunoSearch}
-                    onChangeText={setAlunoSearch}
-                />
-                <FlatList
-                    data={alunos.filter((aluno) =>
-                        `${aluno.nome} ${aluno.ultimoNome} ${aluno.email}`
-                            .toLowerCase()
-                            .includes(alunoSearch.toLowerCase())
-                    )}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <CheckBox
-                            title={`${item.nome} ${item.ultimoNome} (${item.email})`}
-                            checked={alunosSelecionados.includes(item.id.toString())}
-                            onPress={() =>
-                                toggleSelection(item.id.toString(), alunosSelecionados, setAlunosSelecionados)
-                            }
+    
+                        {/* Ano Escolar */}
+                        <Text style={styles.sectionTitle}>Ano Escolar *</Text>
+                        <Picker
+                            selectedValue={anoEscolar}
+                            style={styles.input}
+                            onValueChange={(itemValue) => setAnoEscolar(itemValue)}
+                        >
+                            <Picker.Item label="Selecione o Ano Escolar" value="" />
+                            <Picker.Item label="1º ano" value="1º ano" />
+                            <Picker.Item label="2º ano" value="2º ano" />
+                            <Picker.Item label="3º ano" value="3º ano" />
+                        </Picker>
+    
+                        {/* Turno */}
+                        <Text style={styles.sectionTitle}>Turno *</Text>
+                        <Picker
+                            selectedValue={turno}
+                            style={styles.input}
+                            onValueChange={(itemValue) => setTurno(itemValue)}
+                        >
+                            <Picker.Item label="Selecione o Turno" value="" />
+                            <Picker.Item label="Matutino" value="Matutino" />
+                            <Picker.Item label="Vespertino" value="Vespertino" />
+                            <Picker.Item label="Noturno" value="Noturno" />
+                        </Picker>
+    
+                        {/* Coordenação */}
+                        <Text style={styles.sectionTitle}>Selecione uma Coordenação *</Text>
+                        <FlatList
+                            data={coordenacoes}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <CheckBox
+                                    title={item.nome || 'Coordenação não disponível'}
+                                    checked={coordenacaoId === item.id.toString()}
+                                    onPress={() => setCoordenacaoId(item.id.toString())}
+                                />
+                            )}
                         />
-                    )}
-                />
-                <Text style={styles.selectedText}>
-                    Selecionados: {alunos
-                        .filter((aluno) => alunosSelecionados.includes(aluno.id.toString()))
-                        .map((aluno) => `${aluno.nome} ${aluno.ultimoNome}`)
-                        .join(', ') || 'Nenhum'}
-                </Text>
-
-
-                {/* Professores */}
-                <Text style={styles.sectionTitle}>Professores</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Buscar Professor"
-                    value={professorSearch}
-                    onChangeText={setProfessorSearch}
-                />
-                <FlatList
-                    data={professores.filter((prof) =>
-                        `${prof.nome} ${prof.ultimoNome} ${prof.email}`
-                            .toLowerCase()
-                            .includes(professorSearch.toLowerCase())
-                    )}
-                    keyExtractor={(item) => item.cpf}
-                    renderItem={({ item }) => (
-                        <CheckBox
-                            title={`${item.nome} ${item.ultimoNome} (${item.email})`}
-                            checked={professoresSelecionados.includes(item.cpf)}
-                            onPress={() =>
-                                toggleSelection(item.cpf, professoresSelecionados, setProfessoresSelecionados)
-                            }
+    
+                        {/* Alunos */}
+                        <Text style={styles.sectionTitle}>Selecione Alunos</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Buscar Aluno"
+                            value={alunoSearch}
+                            onChangeText={setAlunoSearch}
                         />
-                    )}
-                />
-                <Text style={styles.selectedText}>
-                    Selecionados: {professores
-                        .filter((prof) => professoresSelecionados.includes(prof.cpf))
-                        .map((prof) => `${prof.nome} ${prof.ultimoNome}`)
-                        .join(', ') || 'Nenhum'}
-                </Text>
-
-                {/* Disciplinas */}
-                <Text style={styles.sectionTitle}>Disciplinas</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Buscar Disciplina (Nome ou ID)"
-                    value={disciplinaSearch}
-                    onChangeText={setDisciplinaSearch}
-                />
-                <FlatList
-                    data={disciplinas.filter((disciplina) =>
-                        disciplina.nome.toLowerCase().includes(disciplinaSearch.toLowerCase()) ||
-                        disciplina.id.toString().includes(disciplinaSearch)
-                    )}
-                    keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <CheckBox
-                            title={`${item.nome} (ID: ${item.id})`} // Mostra o nome e o ID na lista
-                            checked={disciplinasSelecionadas.includes(item.id.toString())}
-                            onPress={() =>
-                                toggleSelection(item.id.toString(), disciplinasSelecionadas, setDisciplinasSelecionadas)
-                            }
+                        <FlatList
+                            data={alunos.slice(0, alunosExibidos).filter((aluno) =>
+                                `${aluno.nome || ''} ${aluno.ultimoNome || ''}`.toLowerCase().includes(alunoSearch.toLowerCase())
+                            )}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <CheckBox
+                                    title={`${item.nome || ''} ${item.ultimoNome || ''}` || 'Aluno não disponível'}
+                                    checked={alunosSelecionados.includes(item.id.toString())}
+                                    onPress={() =>
+                                        toggleSelection(item.id.toString(), alunosSelecionados, setAlunosSelecionados)
+                                    }
+                                />
+                            )}
                         />
-                    )}
-                />
-                <Text style={styles.selectedText}>
-                    Selecionados: {disciplinas
-                        .filter((disciplina) =>
-                            disciplinasSelecionadas.includes(disciplina.id.toString())
-                        )
-                        .map((disciplina) => disciplina.nome) // Apenas o nome nas selecionadas
-                        .join(', ') || 'Nenhuma'}
-                </Text>
-
-                {/* Botão de Salvar */}
-                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                    <Text style={styles.saveButtonText}>Salvar</Text>
-                </TouchableOpacity>
-            </ScrollView>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity onPress={() => handleVerMais(setAlunosExibidos, alunosExibidos)}>
+                                <Text style={styles.verMais}>Ver Mais</Text>
+                            </TouchableOpacity>
+                            {alunosExibidos > 5 && (
+                                <TouchableOpacity onPress={() => handleVerMenos(setAlunosExibidos, alunosExibidos)}>
+                                    <Text style={styles.verMenos}>Ver Menos</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    </View>
+                )}
+                renderItem={({ item }) => (
+                    <View>
+                        {/* Professores */}
+                        <TouchableOpacity
+                            style={styles.expandableHeader}
+                            onPress={() => {
+                                setAssociacaoDisciplinasProfessores((prev) => {
+                                    const index = prev.findIndex((assoc) => assoc.professorId === item.cpf);
+    
+                                    if (index >= 0) {
+                                        // Se o professor já está expandido, colapsa sem alterar suas disciplinas
+                                        return prev.map((assoc) =>
+                                            assoc.professorId === item.cpf
+                                                ? { ...assoc, expanded: !assoc.expanded }
+                                                : assoc
+                                        );
+                                    } else {
+                                        // Adiciona o professor como expandido com disciplinas vazias
+                                        return [...prev, { professorId: item.cpf, disciplinasIds: [], expanded: true }];
+                                    }
+                                });
+                            }}
+                        >
+                            <Text style={styles.expandableHeaderText}>
+                                {item.nome ? `${item.nome} ${item.ultimoNome}` : 'Nome não disponível'}
+                            </Text>
+                        </TouchableOpacity>
+    
+                        {/* Disciplinas vinculadas */}
+                        {associacaoDisciplinasProfessores.some((assoc) => assoc.professorId === item.cpf && assoc.expanded) && (
+                            <FlatList
+                                data={disciplinas}
+                                keyExtractor={(disciplina) => disciplina.id.toString()}
+                                renderItem={({ item: disciplina }) => {
+                                    const professorAssociado = associacaoDisciplinasProfessores.find(
+                                        (assoc) => assoc.professorId === item.cpf
+                                    );
+    
+                                    return (
+                                        <CheckBox
+                                            title={disciplina.nome || 'Disciplina não disponível'}
+                                            checked={professorAssociado?.disciplinasIds.includes(disciplina.id)}
+                                            onPress={() => associarDisciplinaAProfessor(item.cpf, disciplina.id)}
+                                        />
+                                    );
+                                }}
+                            />
+                        )}
+                    </View>
+                )}
+                ListFooterComponent={(
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                        <Text style={styles.saveButtonText}>Salvar</Text>
+                    </TouchableOpacity>
+                )}
+            />
         </LayoutWrapper>
     );
+    
+
+
 };
 
 const styles = StyleSheet.create({
@@ -303,33 +300,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#DDD',
         borderRadius: 8,
-        paddingHorizontal: 12, // Adiciona espaçamento horizontal para evitar corte
+        paddingHorizontal: 12,
         marginBottom: 12,
-        height: 50, // Ajusta a altura para comportar o texto adequadamente
-        justifyContent: 'center', // Alinha o texto no centro vertical
-        fontSize: 14, // Mantém o texto com tamanho legível
-    },
-    inputMini: {
-        width: '48%', // Padroniza a largura
-        backgroundColor: '#FFF',
-        borderWidth: 1,
-        borderColor: '#DDD',
-        borderRadius: 8,
-        padding: 10,
-        marginBottom: 12,
+        height: 50,
+        justifyContent: 'center',
         fontSize: 14,
-        height: 50, // Padroniza a altura
-    },
-    picker: {
-        width: '100%',
-        backgroundColor: '#FFF',
-        borderWidth: 1,
-        borderColor: '#DDD',
-        borderRadius: 8,
-        paddingVertical: 12,
-        marginBottom: 12,
-        height: 50, // Altura mínima para o picker
-        justifyContent: 'center', // Alinha o texto no centro verticalmente
     },
     selectedText: {
         fontSize: 14,
@@ -341,12 +316,75 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 8,
         alignItems: 'center',
+        marginTop: 16,
     },
     saveButtonText: {
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold',
     },
+    verMais: {
+        color: '#007BFF',
+        textAlign: 'center',
+        marginVertical: 10,
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    inputMini: {
+        width: '48%',
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#DDD',
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 12,
+        fontSize: 14,
+        height: 50,
+    },
+    picker: {
+        width: '100%',
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#DDD',
+        borderRadius: 8,
+        paddingVertical: 12,
+        marginBottom: 12,
+        height: 50,
+        justifyContent: 'center',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    loadingText: {
+        fontSize: 16,
+        color: '#007BFF',
+        marginTop: 10,
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+    },
+    checkboxLabel: {
+        fontSize: 14,
+        color: '#333',
+    },
+    expandableHeader: {
+        padding: 12,
+        backgroundColor: '#f8f8f8',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    expandableHeaderText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#0056b3',
+    }
 });
+
 
 export default TurmaCreateScreen;

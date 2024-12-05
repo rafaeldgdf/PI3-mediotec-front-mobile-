@@ -16,12 +16,10 @@ import LayoutWrapper from '../../../components/LayoutWrapper';
 const AlunoListScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [alunos, setAlunos] = useState([]);
-  const [turmas, setTurmas] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchAlunos();
-    fetchTurmas();
   }, []);
 
   // Fetching Students
@@ -29,7 +27,10 @@ const AlunoListScreen = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await api.get('/alunos');
-      setAlunos(response.data);
+      const alunosOrdenados = response.data.sort((a, b) =>
+        a.nome.localeCompare(b.nome)
+      );
+      setAlunos(alunosOrdenados);
     } catch (error) {
       console.error('Erro ao buscar alunos:', error);
       Alert.alert('Erro', 'Falha ao carregar a lista de alunos.');
@@ -38,62 +39,50 @@ const AlunoListScreen = ({ navigation }) => {
     }
   };
 
-  // Fetching Classes (Turmas)
-  const fetchTurmas = async () => {
-    try {
-      const response = await api.get('/turmas');
-      setTurmas(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar turmas:', error);
-      Alert.alert('Erro', 'Falha ao carregar as turmas.');
-    }
-  };
-
-  // Get Class Name by ID
-  const getTurmaNome = (idTurma) => {
-    const turma = turmas.find((t) => t.id === idTurma);
-    return turma ? turma.nome : 'Não associado';
-  };
-
-  // Deleting a Student
-  const handleDelete = async (cpf) => {
-    Alert.alert(
-      'Confirmação',
-      'Tem certeza que deseja deletar este aluno?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Deletar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/alunos/${cpf}`);
+// Deleting a Student
+const handleDelete = async (id) => {
+  Alert.alert(
+    'Confirmação',
+    'Tem certeza que deseja deletar este aluno?',
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Deletar',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // Faz o DELETE usando o ID do aluno
+            const response = await api.delete(`/alunos/${id}`);
+            if (response.status === 200 || response.status === 204) {
               Alert.alert('Sucesso', 'Aluno deletado com sucesso.');
-              fetchAlunos();
-            } catch (error) {
-              console.error('Erro ao deletar aluno:', error);
-              Alert.alert('Erro', 'Falha ao deletar aluno.');
+              fetchAlunos(); // Recarrega a lista de alunos após exclusão
             }
-          },
+          } catch (error) {
+            console.error('Erro ao deletar aluno:', error.response?.data || error.message);
+            Alert.alert('Erro', error.response?.data?.message || 'Falha ao deletar aluno.');
+          }
         },
-      ]
-    );
-  };
+      },
+    ]
+  );
+};
+
 
   // Filter Students by Search Term
-  const filteredAlunos = alunos.filter((aluno) => {
-    const searchLower = searchTerm.toLowerCase();
-    const nomeCompleto = `${aluno.nome} ${aluno.ultimoNome}`.toLowerCase();
-    const turmaNome = getTurmaNome(aluno.idTurma).toLowerCase();
+  const filteredAlunos = alunos
+    .filter((aluno) => {
+      const searchLower = searchTerm.toLowerCase();
+      const nomeCompleto = `${aluno.nome} ${aluno.ultimoNome}`.toLowerCase();
+      const turmaNome = aluno.turmas?.map((t) => t.nome).join(', ').toLowerCase() || 'Não associado';
 
-    return (
-      nomeCompleto.includes(searchLower) ||
-      aluno.cpf.includes(searchLower) ||
-      aluno.email.toLowerCase().includes(searchLower) ||
-      turmaNome.includes(searchLower)
-    );
-  });
-
+      return (
+        nomeCompleto.includes(searchLower) ||
+        aluno.cpf.includes(searchLower) ||
+        aluno.email.toLowerCase().includes(searchLower) ||
+        turmaNome.includes(searchLower)
+      );
+    })
+    .sort((a, b) => a.nome.localeCompare(b.nome));
 
   return (
     <LayoutWrapper navigation={navigation} handleLogout={() => navigation.navigate('LoginScreen')}>
@@ -136,7 +125,8 @@ const AlunoListScreen = ({ navigation }) => {
                 <Icon name="email" size={16} /> <Text style={styles.bold}>Email:</Text> {item.email}
               </Text>
               <Text style={styles.cardInfo}>
-                <Icon name="class" size={16} /> <Text style={styles.bold}>Turma:</Text> {getTurmaNome(item.idTurma)}
+                <Icon name="class" size={16} /> <Text style={styles.bold}>Turma:</Text>{' '}
+                {item.turmas?.map((t) => t.nome).join(', ') || 'Não associado'}
               </Text>
 
               {/* Action Buttons */}
@@ -154,7 +144,7 @@ const AlunoListScreen = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.cardButton, styles.deleteButton]}
-                  onPress={() => handleDelete(item.cpf)}
+                  onPress={() => handleDelete(item.id)}
                 >
                   <Icon name="delete" size={18} color="#FFF" />
                   <Text style={styles.buttonText}>Deletar</Text>
@@ -178,6 +168,7 @@ const AlunoListScreen = ({ navigation }) => {
     </LayoutWrapper>
   );
 };
+
 
 const styles = StyleSheet.create({
   titleContainer: {

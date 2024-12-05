@@ -69,7 +69,7 @@ const TurmaDisciplinaListConceitoScreen = ({ navigation }) => {
             {/* Cabeçalho */}
             <View style={styles.header}>
                 <Text style={styles.pageTitle}>
-                    <Icon name="list" size={24} color="#0056b3" /> Turmas e Disciplinas do Prof. {nomeProfessor} {ultimoNomeProfessor}
+                    <Icon name="school" size={24} color="#0056b3" /> Conceitos do Prof. {nomeProfessor} {ultimoNomeProfessor}
                 </Text>
                 <Text style={styles.subtitle}>Visualize as disciplinas atribuídas a cada turma.</Text>
             </View>

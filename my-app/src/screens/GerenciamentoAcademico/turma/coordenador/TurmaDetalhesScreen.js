@@ -22,6 +22,8 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
     const [filteredAlunos, setFilteredAlunos] = useState([]);
     const [filteredProfessores, setFilteredProfessores] = useState([]);
     const [status, setStatus] = useState(turma?.status || false);
+    const [alunosVisiveis, setAlunosVisiveis] = useState(5);
+    const [professoresVisiveis, setProfessoresVisiveis] = useState(5);
 
     useEffect(() => {
         fetchTurmaCompleta();
@@ -34,6 +36,7 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
     useEffect(() => {
         filterProfessores();
     }, [searchProfessores, detalhesTurma]);
+
     const fetchTurmaCompleta = async () => {
         try {
             const response = await api.get(`/turmas/${turma.id}`);
@@ -50,58 +53,66 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
             Alert.alert('Erro', 'Não foi possível carregar os detalhes da turma.');
         }
     };
-    
-
-
     const filterAlunos = () => {
         const alunos = detalhesTurma.alunos || [];
-        const filtered = alunos.filter((aluno) =>
-            [aluno.nomeAluno || '', aluno.matricula || '', aluno.email || '']
-                .join(' ')
-                .toLowerCase()
-                .includes(searchAlunos.toLowerCase())
-        );
+        const filtered = alunos
+            .filter((aluno) =>
+                [aluno.nomeAluno || '', aluno.matricula || '', aluno.email || '']
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(searchAlunos.toLowerCase())
+            )
+            .sort((a, b) => a.nomeAluno.localeCompare(b.nomeAluno));
         setFilteredAlunos(filtered);
     };
-    
+
     const filterProfessores = () => {
         const professores = detalhesTurma.disciplinasProfessores || [];
-        const filtered = professores.filter((professor) =>
-            [
-                professor.nomeProfessor || '',
-                ...(professor.nomesDisciplinas || []),
-                professor.email || '',
-            ]
-                .join(' ')
-                .toLowerCase()
-                .includes(searchProfessores.toLowerCase())
-        );
+        const filtered = professores
+            .filter((professor) =>
+                [
+                    professor.nomeProfessor || '',
+                    ...(professor.nomesDisciplinas || []),
+                    professor.email || '',
+                ]
+                    .join(' ')
+                    .toLowerCase()
+                    .includes(searchProfessores.toLowerCase())
+            )
+            .sort((a, b) => a.nomeProfessor.localeCompare(b.nomeProfessor));
         setFilteredProfessores(filtered);
     };
-    
 
     const toggleStatus = async () => {
         try {
             const novoStatus = !status;
-    
-            // Envia diretamente o boolean esperado
             await api.patch(`/turmas/${detalhesTurma.id}/status`, novoStatus, {
                 headers: {
-                    'Content-Type': 'application/json', // Especifica o tipo de dado enviado
+                    'Content-Type': 'application/json',
                 },
             });
-    
-            setStatus(novoStatus); // Atualiza o estado local
+            setStatus(novoStatus);
             Alert.alert('Sucesso', `Status alterado para ${novoStatus ? 'Ativo' : 'Inativo'}.`);
         } catch (error) {
             console.error('Erro ao alterar status:', error);
             Alert.alert('Erro', 'Não foi possível alterar o status da turma.');
         }
     };
-    
 
-    const handleEdit = () => {
-        navigation.navigate('TurmaCreateScreen', { turma: detalhesTurma });
+    const handleVerMaisAlunos = () => {
+        setAlunosVisiveis(alunosVisiveis + 5);
+    };
+
+    const handleVerMenosAlunos = () => {
+        setAlunosVisiveis(Math.max(alunosVisiveis - 5, 5));
+    };
+
+    const handleVerMaisProfessores = () => {
+        setProfessoresVisiveis(professoresVisiveis + 5);
+    };
+
+    const handleVerMenosProfessores = () => {
+        setProfessoresVisiveis(Math.max(professoresVisiveis - 5, 5));
     };
 
     const handleDelete = () => {
@@ -127,7 +138,6 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
             ]
         );
     };
-
     return (
         <LayoutWrapper navigation={navigation} handleLogout={() => navigation.navigate('LoginScreen')}>
             <View style={{ flex: 1 }}>
@@ -138,7 +148,7 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
                         <Text style={styles.subtitle}>
                             {detalhesTurma.anoEscolar || 'Ano Escolar Não Informado'} - {detalhesTurma.turno || 'Turno Não Informado'}
                         </Text>
-                        <TouchableOpacity style={styles.editIcon} onPress={handleEdit}>
+                        <TouchableOpacity style={styles.editIcon} onPress={() => navigation.navigate('TurmaCreateScreen', { turma: detalhesTurma })}>
                             <Icon name="edit" size={20} color="#FFF" />
                         </TouchableOpacity>
                     </View>
@@ -161,48 +171,6 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
                         <Text style={styles.infoText}>
                             <Icon name="event" size={16} /> <Text style={styles.bold}>Ano Letivo:</Text> {detalhesTurma.anoLetivo || 'Não informado'}
                         </Text>
-                        <View style={styles.switchContainer}>
-                            <Text style={styles.statusText}>
-                                <Icon name="toggle-on" size={16} /> Status:{' '}
-                                <Text style={{ color: status ? '#28A745' : '#DC3545' }}>{status ? 'Ativo' : 'Inativo'}</Text>
-                            </Text>
-                            <Switch
-                                trackColor={{ false: '#767577', true: '#28A745' }}
-                                thumbColor={status ? '#FFF' : '#f4f3f4'}
-                                onValueChange={toggleStatus}
-                                value={status}
-                            />
-                        </View>
-                    </View>
-
-                    {/* Coordenação */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>
-                            <Icon name="group" size={18} /> Coordenação
-                        </Text>
-                        {detalhesTurma.coordenacao ? (
-                            <View style={styles.infoBox}>
-                                <Text style={styles.infoText}>
-                                    <Icon name="badge" size={16} /> <Text style={styles.bold}>Nome:</Text> {detalhesTurma.coordenacao.nome}
-                                </Text>
-                                {detalhesTurma.coordenacao.coordenadores.map((coord, index) => (
-                                    <Text key={index} style={styles.infoText}>
-                                        <Icon name="person" size={16} /> <Text style={styles.bold}>Coord.:</Text> {coord.nomeCoordenador} ({coord.email})
-                                    </Text>
-                                ))}
-                                <TouchableOpacity
-                                    style={styles.actionButton}
-                                    onPress={() =>
-                                        navigation.navigate('CoordenacaoDetalhesScreen', { coordenacao: detalhesTurma.coordenacao })
-                                    }
-                                >
-                                    <Icon name="info" size={16} color="#FFF" />
-                                    <Text style={styles.buttonText}>Abrir Detalhes</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ) : (
-                            <Text style={styles.infoText}>Nenhuma coordenação associada.</Text>
-                        )}
                     </View>
 
                     {/* Alunos */}
@@ -216,9 +184,8 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
                             value={searchAlunos}
                             onChangeText={setSearchAlunos}
                         />
-                        {filteredAlunos.length > 0 ? (
-                            filteredAlunos.map((aluno, index) => (
-                                <View key={index} style={styles.infoBox}>
+                        {filteredAlunos.slice(0, alunosVisiveis).map((aluno, index) => (
+                            <View key={index} style={styles.infoBox}>
                                     <Text style={styles.infoText}>
                                         <Icon name="person" size={16} /> <Text style={styles.bold}>Nome:</Text> {aluno.nomeAluno}
                                     </Text>
@@ -228,17 +195,24 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
                                     <Text style={styles.infoText}>
                                         <Icon name="email" size={16} /> <Text style={styles.bold}>Email:</Text> {aluno.email}
                                     </Text>
-                                    <TouchableOpacity
-                                        style={styles.actionButton}
-                                        onPress={() => navigation.navigate('AlunoDetalhesScreen', { aluno })}
-                                    >
-                                        <Icon name="info" size={16} color="#FFF" />
-                                        <Text style={styles.buttonText}>Abrir Detalhes</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ))
-                        ) : (
-                            <Text style={styles.infoText}>Nenhum aluno cadastrado.</Text>
+                                <TouchableOpacity
+                                    style={styles.actionButton}
+                                    onPress={() => navigation.navigate('AlunoDetalhesScreen', { aluno })}
+                                >
+                                    <Icon name="info" size={16} color="#FFF" />
+                                    <Text style={styles.buttonText}>Abrir Detalhes</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                        {filteredAlunos.length > alunosVisiveis && (
+                            <TouchableOpacity onPress={handleVerMaisAlunos}>
+                                <Text style={styles.verMais}>Ver Mais Alunos</Text>
+                            </TouchableOpacity>
+                        )}
+                        {alunosVisiveis > 5 && (
+                            <TouchableOpacity onPress={handleVerMenosAlunos}>
+                                <Text style={styles.verMenos}>Ver Menos Alunos</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
 
@@ -253,35 +227,40 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
                             value={searchProfessores}
                             onChangeText={setSearchProfessores}
                         />
-                        {filteredProfessores.length > 0 ? (
-                            filteredProfessores.map((professor, index) => (
-                                <View key={index} style={styles.infoBox}>
-                                    <Text style={styles.infoText}>
-                                        <Icon name="person" size={16} /> <Text style={styles.bold}>Professor:</Text> {professor.nomeProfessor}
-                                    </Text>
-                                    <Text style={styles.infoText}>
-                                        <Icon name="book" size={16} /> <Text style={styles.bold}>Disciplinas:</Text>{' '}
-                                        {professor.nomesDisciplinas.join(', ')}
-                                    </Text>
-                                    <TouchableOpacity
-                                        style={styles.actionButton}
-                                        onPress={() => navigation.navigate('ProfessorDetalhesScreen', { cpf: professor.professorId })}>
-                                        <Icon name="info" size={16} color="#FFF" />
-                                        <Text style={styles.buttonText}>Abrir Detalhes</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            ))
-                        ) : (
-                            <Text style={styles.infoText}>Nenhum professor associado.</Text>
+                        {filteredProfessores.slice(0, professoresVisiveis).map((professor, index) => (
+                            <View key={index} style={styles.infoBox}>
+                                <Text style={styles.infoText}>
+                                    <Icon name="person" size={16} /> <Text style={styles.bold}>Professor:</Text> {professor.nomeProfessor}
+                                </Text>
+                                <Text style={styles.infoText}>
+                                    <Icon name="book" size={16} /> <Text style={styles.bold}>Disciplinas:</Text>{' '}
+                                    {professor.nomesDisciplinas ? professor.nomesDisciplinas.join(', ') : 'Nenhuma'}
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.actionButton}
+                                    onPress={() => navigation.navigate('ProfessorDetalhesScreen', { cpf: professor.professorId })}
+                                >
+                                    <Icon name="info" size={16} color="#FFF" />
+                                    <Text style={styles.buttonText}>Abrir Detalhes</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                        {filteredProfessores.length > professoresVisiveis && (
+                            <TouchableOpacity onPress={handleVerMaisProfessores}>
+                                <Text style={styles.verMais}>Ver Mais Professores</Text>
+                            </TouchableOpacity>
+                        )}
+                        {professoresVisiveis > 5 && (
+                            <TouchableOpacity onPress={handleVerMenosProfessores}>
+                                <Text style={styles.verMenos}>Ver Menos Professores</Text>
+                            </TouchableOpacity>
                         )}
                     </View>
-
-
                 </ScrollView>
 
                 {/* Botões de Ação */}
                 <View style={styles.fixedButtonContainer}>
-                    <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEdit}>
+                    <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => navigation.navigate('TurmaCreateScreen', { turma: detalhesTurma })}>
                         <Icon name="edit" size={16} color="#FFF" />
                         <Text style={styles.buttonText}>Editar</Text>
                     </TouchableOpacity>
@@ -295,7 +274,6 @@ const TurmaDetalhesScreen = ({ route, navigation }) => {
     );
 
 };
-
 
 const styles = StyleSheet.create({
     scrollContent: {
@@ -452,6 +430,20 @@ const styles = StyleSheet.create({
         backgroundColor: '#DC3545',
         borderRadius: 12,
     },
+    verMais: {
+        color: '#007BFF',
+        textAlign: 'center',
+        marginTop: 10,
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    verMenos: {
+        color: '#FF4500',
+        textAlign: 'center',
+        marginTop: 10,
+        fontSize: 14,
+        fontWeight: 'bold',
+    }
 });
 
 export default TurmaDetalhesScreen;
