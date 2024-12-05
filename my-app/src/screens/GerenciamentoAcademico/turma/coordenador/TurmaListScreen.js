@@ -10,132 +10,124 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import api from '../../../api/api';
-import LayoutWrapper from '../../../components/LayoutWrapper';
+import api from '../../../../api/api';
+import LayoutWrapper from '../../../../components/LayoutWrapper';
 
-const AlunoListScreen = ({ navigation }) => {
+const TurmaListScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [alunos, setAlunos] = useState([]);
+  const [turmas, setTurmas] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchAlunos();
+    fetchTurmas();
   }, []);
 
-  // Fetching Students
-  const fetchAlunos = async () => {
+  // Buscar Turmas
+  const fetchTurmas = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/alunos');
-      const alunosOrdenados = response.data.sort((a, b) =>
-        a.nome.localeCompare(b.nome)
-      );
-      setAlunos(alunosOrdenados);
+      const response = await api.get('/turmas');
+      setTurmas(response.data);
     } catch (error) {
-      console.error('Erro ao buscar alunos:', error);
-      Alert.alert('Erro', 'Falha ao carregar a lista de alunos.');
+      console.error('Erro ao buscar turmas:', error);
+      Alert.alert('Erro', 'Falha ao carregar as turmas.');
     } finally {
       setLoading(false);
     }
   };
 
-// Deleting a Student
-const handleDelete = async (id) => {
-  Alert.alert(
-    'Confirmação',
-    'Tem certeza que deseja deletar este aluno?',
-    [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Deletar',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            // Faz o DELETE usando o ID do aluno
-            const response = await api.delete(`/alunos/${id}`);
-            if (response.status === 200 || response.status === 204) {
-              Alert.alert('Sucesso', 'Aluno deletado com sucesso.');
-              fetchAlunos(); // Recarrega a lista de alunos após exclusão
+  // Deletar Turma
+  const handleDelete = async (id) => {
+    Alert.alert(
+      'Confirmação',
+      'Tem certeza que deseja deletar esta turma?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Deletar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              console.log(`Tentando deletar turma com ID: ${id}`);
+              await api.delete(`/turmas/${id}`);
+              Alert.alert('Sucesso', 'Turma deletada com sucesso.');
+              fetchTurmas(); // Atualizar a lista
+            } catch (error) {
+              console.error('Erro ao deletar turma:', error.response?.data || error.message);
+              Alert.alert('Erro', 'Falha ao deletar turma.');
             }
-          } catch (error) {
-            console.error('Erro ao deletar aluno:', error.response?.data || error.message);
-            Alert.alert('Erro', error.response?.data?.message || 'Falha ao deletar aluno.');
-          }
+          },
         },
-      },
-    ]
-  );
-};
+      ]
+    );
+  };
 
 
-  // Filter Students by Search Term
-  const filteredAlunos = alunos
-    .filter((aluno) => {
-      const searchLower = searchTerm.toLowerCase();
-      const nomeCompleto = `${aluno.nome} ${aluno.ultimoNome}`.toLowerCase();
-      const turmaNome = aluno.turmas?.map((t) => t.nome).join(', ').toLowerCase() || 'Não associado';
-
-      return (
-        nomeCompleto.includes(searchLower) ||
-        aluno.cpf.includes(searchLower) ||
-        aluno.email.toLowerCase().includes(searchLower) ||
-        turmaNome.includes(searchLower)
-      );
-    })
-    .sort((a, b) => a.nome.localeCompare(b.nome));
+  // Filtrar Turmas pelo Termo de Busca
+  const filteredTurmas = turmas.filter((turma) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      turma.nome.toLowerCase().includes(searchLower) ||
+      turma.anoEscolar.toLowerCase().includes(searchLower) ||
+      turma.turno.toLowerCase().includes(searchLower) ||
+      turma.coordenacao?.nome?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <LayoutWrapper navigation={navigation} handleLogout={() => navigation.navigate('LoginScreen')}>
-      {/* Title */}
+      {/* Título da Página */}
       <View style={styles.titleContainer}>
         <Text style={styles.pageTitle}>
-          <Icon name="list" size={24} color="#0056b3" /> Lista de Alunos
+          <Icon name="list" size={24} color="#0056b3" /> Lista de Turmas
         </Text>
         <Text style={styles.subtitle}>
-          Gerencie e visualize os alunos cadastrados.
+          Gerencie e visualize as turmas cadastradas.
         </Text>
       </View>
 
-      {/* Search Bar */}
+      {/* Barra de Pesquisa */}
       <TextInput
         style={styles.searchInput}
-        placeholder="Buscar Aluno"
+        placeholder="Buscar Turma"
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
 
-      {/* Student List */}
+      {/* Lista de Turmas */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#007BFF" />
           <Text style={styles.loadingText}>Carregando...</Text>
         </View>
-      ) : filteredAlunos.length > 0 ? (
+      ) : filteredTurmas.length > 0 ? (
         <FlatList
-          data={filteredAlunos}
-          keyExtractor={(item) => item.cpf}
+          data={filteredTurmas}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              {/* Student Info */}
-              <Text style={styles.cardTitle}>{`ALUNO(A): ${item.nome} ${item.ultimoNome}`}</Text>
+              {/* Informações da Turma */}
+              <Text style={styles.cardTitle}>{`${item.nome}`}</Text>
               <Text style={styles.cardInfo}>
-                <Icon name="badge" size={16} /> <Text style={styles.bold}>CPF:</Text> {item.cpf}
+                <Icon name="calendar-today" size={16} /> <Text style={styles.bold}>Ano Escolar:</Text> {item.anoEscolar}
               </Text>
               <Text style={styles.cardInfo}>
-                <Icon name="email" size={16} /> <Text style={styles.bold}>Email:</Text> {item.email}
+                <Icon name="access-time" size={16} /> <Text style={styles.bold}>Turno:</Text> {item.turno}
               </Text>
               <Text style={styles.cardInfo}>
-                <Icon name="class" size={16} /> <Text style={styles.bold}>Turma:</Text>{' '}
-                {item.turmas?.map((t) => t.nome).join(', ') || 'Não associado'}
+                <Icon name="date-range" size={16} /> <Text style={styles.bold}>Ano Letivo:</Text> {item.anoLetivo}
+              </Text>
+              <Text style={styles.cardInfo}>
+                <Icon name="group" size={16} /> <Text style={styles.bold}>Coordenação:</Text> {item.coordenacao?.nome || 'Não informado'}
               </Text>
 
-              {/* Action Buttons */}
+              {/* Botões de Ação */}
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={[styles.cardButton, styles.openButton]}
                   onPress={() =>
-                    navigation.navigate('AlunoDetalhesScreen', {
-                      aluno: item,
+                    navigation.navigate('TurmaDetalhesScreen', {
+                      turma: item,
                     })
                   }
                 >
@@ -154,26 +146,25 @@ const handleDelete = async (id) => {
           )}
         />
       ) : (
-        <Text style={styles.emptyText}>Nenhum aluno encontrado.</Text>
+        <Text style={styles.emptyText}>Nenhuma turma encontrada.</Text>
       )}
 
-      {/* Add Student Button */}
+      {/* Botão de Cadastro */}
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('AlunoCreateScreen')}
+        onPress={() => navigation.navigate('TurmaCreateScreen')}
       >
         <Icon name="add" size={20} color="#FFF" />
-        <Text style={styles.addButtonText}>Cadastrar Aluno</Text>
+        <Text style={styles.addButtonText}>Cadastrar Turma</Text>
       </TouchableOpacity>
     </LayoutWrapper>
   );
 };
 
-
 const styles = StyleSheet.create({
   titleContainer: {
-    marginBottom: 16,
     alignItems: 'center',
+    marginVertical: 20,
   },
   pageTitle: {
     fontSize: 24,
@@ -205,6 +196,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#E5E5E5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   cardTitle: {
     fontSize: 20,
@@ -212,11 +208,16 @@ const styles = StyleSheet.create({
     color: '#0056b3',
     marginBottom: 8,
     textTransform: 'uppercase',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    paddingBottom: 4,
   },
   cardInfo: {
     fontSize: 14,
     color: '#444',
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   bold: {
     fontWeight: 'bold',
@@ -236,6 +237,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flex: 1,
     marginHorizontal: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   openButton: {
     backgroundColor: '#28A745',
@@ -257,6 +263,11 @@ const styles = StyleSheet.create({
     margin: 16,
     paddingVertical: 14,
     borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   addButtonText: {
     color: '#FFF',
@@ -284,4 +295,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AlunoListScreen;
+
+export default TurmaListScreen;

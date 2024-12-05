@@ -595,6 +595,8 @@ const AlunoCreateScreen = ({ route, navigation }) => {
             </ScrollView>
         </LayoutWrapper>
     );
+
+    
 };
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,125 +6,162 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  BackHandler,
   Alert,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [userType, setUserType] = useState('aluno');
+const LoginScreen = () => {
+  const navigation = useNavigation();
 
-  // Bloqueia o botão "Voltar" para impedir o retorno a telas anteriores
-  useEffect(() => {
-    const backAction = () => {
-      Alert.alert('Sair', 'Deseja fechar o aplicativo?', [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Fechar', onPress: () => BackHandler.exitApp() }, // Fecha o aplicativo
-      ]);
-      return true; // Impede o comportamento padrão do botão voltar
-    };
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [secureText, setSecureText] = useState(true);
 
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction
-    );
-
-    return () => backHandler.remove(); // Remove o listener quando o componente desmontar
-  }, []);
+  // Função para verificar se o e-mail é válido
+  const isEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return regex.test(email);
+  };
 
   // Função de login
-// Função de login
-const handleLogin = async () => {
-  try {
-    // Enviar as credenciais para o back-end
-    const response = await axios.post('http://10.0.0.103:8080/auth/login', {
-      email,
-      senha,
-      role: userType  // Passa a role (aluno, professor ou coordenador)
-    });
-
-    const { token } = response.data; // O token será retornado pela API
-
-    // Armazenar o token JWT no AsyncStorage
-    await AsyncStorage.setItem('jwtToken', token);
-
-    // Navegar para a tela apropriada com base no tipo de usuário
-    if (userType === 'aluno') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'AlunoMenu' }],
-      });
-    } else if (userType === 'professor') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'ProfessorMenu' }],
-      });
-    } else if (userType === 'coordenador') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'CoordenadorMenu' }],
-      });
+  const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert("Erro", "Preencha o e-mail e a senha.");
+      return;
     }
-  } catch (error) {
-    Alert.alert('Erro', 'Credenciais inválidas ou erro na requisição.');
-  }
-};
 
+    if (!isEmail(email)) {
+      Alert.alert("Erro", "Por favor, insira um e-mail válido.");
+      return;
+    }
+
+    try {
+      console.log("Enviando dados para o backend...");
+
+      const response = await fetch("http://10.0.2.2:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identificador: email,
+          senha: senha,
+        }),
+      });
+
+      console.log("Resposta recebida:", response);
+
+      // Verificar se a resposta foi bem-sucedida
+      if (!response.ok) {
+        if (response.status === 401) {
+          Alert.alert(
+            "Erro",
+            "Credenciais inválidas. Verifique seu e-mail e senha."
+          );
+        } else {
+          const errorText = await response.text();
+          Alert.alert("Erro", `Erro no servidor: ${errorText}`);
+        }
+        return;
+      }
+
+      // Processar a resposta JSON
+      const data = await response.json();
+      console.log("Dados processados:", data);
+
+      const { tipoUsuario, usuario } = data;
+
+      // Valida os dados recebidos
+      if (!tipoUsuario || !usuario || !usuario.cpf) {
+        Alert.alert("Erro", "Resposta inesperada do servidor.");
+        return;
+      }
+
+
+      // Armazena as informações no AsyncStorage
+      await AsyncStorage.setItem(
+        "userInfo",
+        JSON.stringify({
+          tipoUsuario,
+          usuario: {
+            id: usuario.id, // Incluído o ID do aluno
+            cpf: usuario.cpf,
+            nome: usuario.nome,
+            ultimoNome: usuario.ultimoNome,
+            email: usuario.email,
+            turmaId: usuario.turmaId || null, // Salve o ID da turma se aplicável
+          },
+        })
+      );
+
+      // Navega para a tela apropriada com base no tipo de usuário
+      switch (tipoUsuario) {
+        case "coordenador":
+          navigation.reset({ index: 0, routes: [{ name: "CoordenadorMenu" }] });
+          break;
+        case "professor":
+          navigation.reset({ index: 0, routes: [{ name: "ProfessorMenu" }] });
+          break;
+        case "aluno":
+          navigation.reset({ index: 0, routes: [{ name: "AlunoMenu" }] });
+          break;
+        default:
+          Alert.alert("Erro", "Tipo de usuário desconhecido.");
+      }
+    } catch (error) {
+      console.error("Erro ao realizar login:", error.message);
+      Alert.alert(
+        "Erro",
+        "Não foi possível realizar o login. Verifique sua conexão e tente novamente."
+      );
+    }
+  };
 
   return (
     <View style={styles.container}>
-      {/* Logo e Título */}
-      <Image source={require('../../../assets/logo-sge.png')} style={styles.logo} />
+      {/* Logo e título */}
+      <Image
+        source={require("../../../assets/logo-sge.png")}
+        style={styles.logo}
+      />
       <Text style={styles.subtitle}>Sistema de Gerenciamento Escolar</Text>
 
-      {/* Campos de Entrada */}
+      {/* Campo de e-mail */}
       <TextInput
         style={styles.input}
-        placeholder="Digite seu login"
+        placeholder="Digite seu e-mail"
         placeholderTextColor="#888"
         value={email}
-        onChangeText={(text) => setEmail(text)} // Guardar o email
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Digite sua senha"
-        placeholderTextColor="#888"
-        secureTextEntry
-        value={senha}
-        onChangeText={(text) => setSenha(text)} // Guardar a senha
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
-      {/* Picker de Tipo de Usuário */}
-      <Text style={styles.label}>Selecione o tipo de usuário:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={userType}
-          style={styles.picker}
-          onValueChange={(itemValue) => setUserType(itemValue)}
+      {/* Campo de senha */}
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.inputPassword}
+          placeholder="Digite sua senha"
+          placeholderTextColor="#888"
+          secureTextEntry={secureText}
+          value={senha}
+          onChangeText={setSenha}
+        />
+        <TouchableOpacity
+          style={styles.eyeIconContainer}
+          onPress={() => setSecureText(!secureText)}
         >
-          <Picker.Item label="Aluno" value="aluno" key="aluno" style={styles.pickerItem} />
-          <Picker.Item label="Professor" value="professor" key="professor" style={styles.pickerItem} />
-          <Picker.Item label="Coordenador" value="coordenador" key="coordenador" style={styles.pickerItem} />
-        </Picker>
-        {/* Ícones Representativos */}
-        <View style={styles.iconsContainer}>
           <Icon
-            name={
-              userType === 'aluno' ? 'person' :
-              userType === 'professor' ? 'school' : 'supervisor-account'
-            }
+            name={secureText ? "visibility-off" : "visibility"}
             size={24}
             color="#007BFF"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {/* Botão de Entrar */}
+      {/* Botão de login */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
@@ -135,90 +172,66 @@ const handleLogin = async () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: "#f4f4f4",
   },
   logo: {
     width: 150,
     height: 150,
     marginBottom: 20,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   subtitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
+    fontWeight: "600",
+    color: "#2c3e50",
     marginBottom: 30,
-    textAlign: 'center',
+    textAlign: "center",
   },
   input: {
-    width: '100%',
+    width: "100%",
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 10,
     marginBottom: 15,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     fontSize: 16,
-    color: '#333',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    color: "#333",
   },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    alignSelf: 'flex-start',
-    color: '#2c3e50',
-  },
-  pickerContainer: {
-    width: '100%',
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 15,
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 10,
-    borderColor: '#ccc',
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: "#fff",
   },
-  picker: {
+  inputPassword: {
     flex: 1,
-    height: 50,
-  },
-  pickerItem: {
+    padding: 15,
     fontSize: 16,
-    color: '#000',
+    color: "#333",
   },
-  iconsContainer: {
-    marginLeft: 10,
+  eyeIconContainer: {
+    paddingRight: 10,
   },
   button: {
-    width: '100%',
+    width: "100%",
     padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
-    backgroundColor: '#3498db',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    alignItems: "center",
+    backgroundColor: "#3498db",
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
