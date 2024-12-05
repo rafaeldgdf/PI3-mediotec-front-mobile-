@@ -5,9 +5,10 @@ import LayoutWrapper from '../../components/LayoutWrapper';
 
 const ProfessorMenu = ({ navigation, handleLogout }) => {
   const menuItems = [
+    { title: 'Perfil', icon: 'person-outline', route: 'PerfilProfessorScreen' }, // Aba Perfil adicionada
+    { title: 'Turmas', icon: 'class', route: 'TurmaListProfessorScreen' },
     { title: 'Presença', icon: 'check-circle', route: 'SelecaoTurmaDisciplinaScreen' },
-    { title: 'Conceitos', icon: 'school', route: 'TurmaDisciplinaListConceitoScreen' },
-    { title: 'Turmas', icon: 'class', route: 'TurmaListProfessorScreen' }, 
+    { title: 'Conceitos', icon: 'school', route: 'TurmaDisciplinaListConceitoScreen' }, 
     { title: 'Comunicados', icon: 'email', route: 'ProfessorComunicadoListScreen' }
   ];
 

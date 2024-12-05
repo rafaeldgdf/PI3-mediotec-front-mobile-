@@ -283,39 +283,45 @@ const PerfilAlunoScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     scrollContent: {
         padding: 16,
-        backgroundColor: '#F4F4F4',
-    },
-    header: {
-        backgroundColor: '#0056b3',
-        paddingVertical: 30,
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    profilePicture: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: '#DDD',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: "#F4F4F4",
+      },
+      header: {
+        backgroundColor: "#0056b3",
+        paddingVertical: 40, // Ajuste para mais espaço ao redor
+        alignItems: "center", // Centraliza horizontalmente
+        justifyContent: "center", // Centraliza verticalmente
+        position: "relative",
+      },
+      profilePicture: {
+        width: 120, // Um pouco maior para ficar mais proporcional
+        height: 120,
+        borderRadius: 60, // Deve ser metade do width e height
+        backgroundColor: "#DDD",
+        justifyContent: "center",
+        alignItems: "center",
         marginBottom: 10,
-    },
-    profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-    },
-    profileName: {
+        borderWidth: 4, // Adicione uma borda para destaque
+        borderColor: "#FFF", // Cor da borda
+      },
+      profileImage: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 60, // Deve ser igual ao borderRadius do profilePicture
+        resizeMode: "cover", // Garante que a imagem preencha o espaço sem distorção
+      },
+      profileName: {
         fontSize: 22,
-        fontWeight: 'bold',
-        color: '#FFF',
-        marginBottom: 5,
-    },
-    profileRole: {
+        fontWeight: "bold",
+        color: "#FFF",
+        marginTop: 10,
+        textAlign: "center",
+      },
+      profileRole: {
         fontSize: 16,
-        color: '#FFF',
-        fontStyle: 'italic',
-    },
+        color: "#FFF",
+        fontStyle: "italic",
+        textAlign: "center",
+      },
     section: {
         backgroundColor: '#FFF',
         marginVertical: 10,

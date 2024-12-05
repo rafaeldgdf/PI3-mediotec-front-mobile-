@@ -5,7 +5,7 @@ import LayoutWrapper from '../../components/LayoutWrapper';
 
 const CoordenadorMenu = ({ navigation, handleLogout }) => {
   const menuItems = [
-    { title: 'Perfil', icon: 'person-outline', route: 'PerfilScreen' }, // Aba Perfil
+    { title: 'Perfil', icon: 'person-outline', route: 'PerfilCoordenadorScreen' }, // Aba Perfil
     { title: 'Coordenação', icon: 'work', route: 'CoordenacaoListScreen' },
     { title: 'Coordenadores', icon: 'supervisor-account', route: 'CoordenadorListScreen' },
     { title: 'Professores', icon: 'school', route: 'ProfessorListScreen' },
