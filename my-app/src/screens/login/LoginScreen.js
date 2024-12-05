@@ -40,7 +40,7 @@ const LoginScreen = () => {
     try {
       console.log("Enviando dados para o backend...");
 
-      const response = await fetch("http://10.0.0.116:8080/auth/login", {
+      const response = await fetch("http://10.0.2.2:8080/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
