@@ -104,7 +104,7 @@ src/main/java/
 ### Passos para o Front-end
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/rafaeldgdf/PI3-mediotec.git
+   git clone https://github.com/rafaeldgdf/PI3-mediotec-front-mobile-.git
    cd PI3-mediotec/front-end
    ```
 2. Instale as dependências:
@@ -123,9 +123,13 @@ src/main/java/
    ```
 
 ### Passos para o Back-end
-1. Acesse o diretório do back-end:
+
+
+
+1. Clone o repositório:
    ```bash
-   cd PI3-mediotec/back-end
+   git clone https://github.com/rafaeldgdf/PI3-mediotec.git
+  cd PI3-mediotec/back-end
    ```
 2. Configure o MySQL no `application.properties`:
    ```bash
